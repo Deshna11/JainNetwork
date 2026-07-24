@@ -10,6 +10,45 @@ export const INDIAN_STATES = [
   'Chandigarh', 'Andaman & Nicobar Islands', 'Dadra & Nagar Haveli and Daman & Diu', 'Lakshadweep',
 ] as const;
 
+// Popular Indian locations (cities, towns, pilgrimage centers) for search dropdowns
+export const POPULAR_LOCATIONS = [
+  'Ahmedabad',
+  'Ajmer',
+  'Bangalore',
+  'Bhopal',
+  'Chennai',
+  'Delhi',
+  'Gwalior',
+  'Hyderabad',
+  'Indore',
+  'Jaipur',
+  'Jodhpur',
+  'Khandwa',
+  'Kolkata',
+  'Kota',
+  'Lalitpur',
+  'Madurai',
+  'Mhow',
+  'Mumbai',
+  'Nagpur',
+  'Nashik',
+  'Palitana',
+  'Pawapuri',
+  'Pune',
+  'Raipur',
+  'Rajkot',
+  'Ranakpur',
+  'Sammed Shikharji',
+  'Shravanabelagola',
+  'Sonagiri',
+  'Surat',
+  'Udaipur',
+  'Ujjain',
+  'Vadodara',
+];
+
+export const POPULAR_CITIES = POPULAR_LOCATIONS;
+
 // Status configuration for badges
 export const STATUS_CONFIG = {
   pending: { label: 'Pending', variant: 'secondary' as const },

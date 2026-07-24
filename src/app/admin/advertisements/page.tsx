@@ -1,24 +1,30 @@
-import { getAllAdvertisements } from '@/actions/admin';
-import { AdminAdsClient } from '@/components/admin-ads-client';
+import { getAdminCampaignsAction } from '@/actions/advertisement';
+import { AdminCampaignsTable } from '@/components/admin-campaigns-table';
+import { ShieldCheck } from 'lucide-react';
 
 export const metadata = {
-  title: 'Manage Advertisements — Admin',
+  title: 'Advertisement Management — Admin Panel',
 };
 
 export default async function AdminAdvertisementsPage() {
-  const ads = await getAllAdvertisements();
+  const campaigns = await getAdminCampaignsAction();
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900">Manage Advertisements</h1>
-      <p className="mt-1 mb-6 text-gray-500">Approve, reject, or delete advertisements.</p>
-      <AdminAdsClient
-        initialAds={ads}
-        searchAction={async (search: string) => {
-          'use server';
-          return getAllAdvertisements(search);
-        }}
-      />
+    <div className="space-y-6 py-6 px-4 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+        <div>
+          <h1 className="flex items-center gap-2 text-2xl font-black text-gray-900">
+            <ShieldCheck className="h-6 w-6 text-blue-600" /> Admin: Advertisement Campaigns
+          </h1>
+          <p className="mt-1 text-xs text-gray-500">
+            Verify manual UPI/Bank transfer payments and approve sponsored homepage campaigns.
+          </p>
+        </div>
+      </div>
+
+      {/* Campaigns Table Component */}
+      <AdminCampaignsTable initialCampaigns={campaigns} />
     </div>
   );
 }
