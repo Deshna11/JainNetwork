@@ -98,6 +98,37 @@ export function RenderAdTemplate({
   const logoSrc = imageUrl && imageUrl.trim() ? imageUrl : fallbackLogo;
 
   switch (templateId) {
+    case 'template-custom':
+    case 'custom':
+      return (
+        <div className={`relative overflow-hidden rounded-2xl border border-amber-200 bg-black shadow-xl ${className}`}>
+          <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-900">
+            <img
+              src={logoSrc}
+              alt={title}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-contain bg-slate-950"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-slate-950/40 p-4 flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-slate-950 px-2.5 py-0.5 text-xs font-black shadow-sm">
+                  ⭐ Custom 16:9 Poster
+                </span>
+                {targetCity && <span className="text-xs font-medium text-white drop-shadow-md">📍 {targetCity}</span>}
+              </div>
+              <div className="space-y-1">
+                {businessName && <p className="text-xs font-bold text-amber-300 drop-shadow-md">{businessName}</p>}
+                <h3 className="text-base font-extrabold text-white leading-snug drop-shadow-md">{title}</h3>
+                {description && <p className="text-xs text-gray-200 line-clamp-2 drop-shadow-md">{description}</p>}
+                <Button size="sm" onClick={onClickCta} className="mt-3 w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-md">
+                  {ctaText}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
     // ----------------------------------------------------
     // Template 1: Minimal Classic
     // ----------------------------------------------------

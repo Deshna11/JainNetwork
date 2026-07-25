@@ -8,7 +8,43 @@ import { getHomepageRunningAdsAction } from '@/actions/advertisement';
 import { RenderAdTemplate } from '@/components/ad-templates';
 import { HeroCarousel } from '@/components/hero-carousel';
 import { HOW_IT_WORKS } from '@/lib/constants';
-import { Sparkles, Search, PlusCircle } from 'lucide-react';
+import {
+  Sparkles,
+  Search,
+  PlusCircle,
+  TrendingUp,
+  Scale,
+  Calculator,
+  Stethoscope,
+  Compass,
+  Building2,
+  Gem,
+  Utensils,
+  Megaphone,
+  Globe,
+  Lightbulb,
+  ShoppingBag,
+  Briefcase,
+  Coins,
+} from 'lucide-react';
+
+const POPULAR_CATEGORIES = [
+  { name: 'Financial Advisors', icon: TrendingUp },
+  { name: 'Lawyers', icon: Scale },
+  { name: 'Chartered Accountants', icon: Calculator },
+  { name: 'Doctors', icon: Stethoscope },
+  { name: 'Architects', icon: Compass },
+  { name: 'Builders', icon: Building2 },
+  { name: 'Jewellers', icon: Gem },
+  { name: 'Food Products', icon: Utensils },
+  { name: 'Digital Marketers', icon: Megaphone },
+  { name: 'Exporters', icon: Globe },
+  { name: 'Cosmetics & Skincare', icon: Sparkles },
+  { name: 'Entrepreneurs', icon: Lightbulb },
+  { name: 'Retailers', icon: ShoppingBag },
+  { name: 'Consultants', icon: Briefcase },
+  { name: 'Investors', icon: Coins },
+];
 
 export default async function HomePage() {
   const [latestBusinesses, stats, categories, runningAds] = await Promise.all([
@@ -126,21 +162,27 @@ export default async function HomePage() {
         <section className="bg-gray-50 py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">Popular Categories</h2>
-              <p className="mt-2 text-gray-500">Browse businesses by category</p>
+              <h2 className="text-2xl font-black text-gray-900 sm:text-3xl">Popular Categories</h2>
+              <p className="mt-2 text-sm text-gray-500">Explore businesses & professionals across key industries</p>
             </div>
-            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {categories.slice(0, 10).map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/businesses?category=${cat.slug}`}
-                  className="group rounded-xl border border-gray-200 bg-white p-4 text-center transition-all hover:border-amber-200 hover:shadow-sm"
-                >
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">
-                    {cat.name}
-                  </p>
-                </Link>
-              ))}
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {POPULAR_CATEGORIES.map((cat) => {
+                const IconComponent = cat.icon;
+                return (
+                  <Link
+                    key={cat.name}
+                    href={`/businesses?category=${encodeURIComponent(cat.name)}`}
+                    className="group relative flex flex-col items-center justify-center rounded-2xl border border-gray-200/80 bg-white p-5 text-center shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-500/10"
+                  >
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-colors group-hover:bg-amber-500 group-hover:text-slate-950">
+                      <IconComponent className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
+                    </div>
+                    <p className="text-xs sm:text-sm font-bold text-gray-800 transition-colors group-hover:text-amber-600">
+                      {cat.name}
+                    </p>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>

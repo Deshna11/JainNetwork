@@ -29,6 +29,8 @@ import {
   Image as ImageIcon,
   X,
   FileImage,
+  AlertTriangle,
+  Layout,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,6 +47,12 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
 
   // Step 1: Selected Plan
   const [selectedPlan, setSelectedPlan] = useState<AdPlan>(AD_PLANS[1]); // Default to Featured
+
+  // Poster Creation Mode: 'template' | 'upload'
+  const [creationMode, setCreationMode] = useState<'template' | 'upload'>('template');
+  const [uploadedPosterPreview, setUploadedPosterPreview] = useState<string | null>(null);
+  const [uploadedPosterUrl, setUploadedPosterUrl] = useState<string>('');
+  const [posterAspectError, setPosterAspectError] = useState<string | null>(null);
 
   // Step 2: Selected Template
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('template-1');
@@ -97,7 +105,62 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
     setTimeout(() => setCopiedUpi(false), 2000);
   };
 
-  // Screenshot File Selection & Validation (JPG, JPEG, PNG, WEBP, max 5MB)
+  // 16:9 Aspect Ratio Poster Upload Handler (Recommended: 1920 × 1080 px)
+  const handlePosterFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      toast.error('Only JPG, JPEG, PNG, and WEBP image formats are supported.');
+      return;
+    }
+
+    const MAX_BYTES = 5 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      toast.error(`File size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 5MB limit.`);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      const img = new Image();
+      img.onload = () => {
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        const ratio = w / h; // 16:9 ratio is 1.7777 (1920 / 1080)
+
+        // Require 16:9 horizontal landscape aspect ratio (tolerance range 1.60 to 1.95)
+        if (ratio < 1.60 || ratio > 1.95) {
+          setPosterAspectError(
+            `Uploaded image resolution is ${w} × ${h} px (${ratio.toFixed(2)}:1 ratio). Please upload a horizontal 16:9 banner (Recommended: 1920 × 1080 px).`
+          );
+          toast.error('Invalid aspect ratio! Please upload a horizontal 16:9 poster (1920 × 1080 px).');
+          setUploadedPosterUrl('');
+          setUploadedPosterPreview(null);
+          return;
+        }
+
+        setPosterAspectError(null);
+        setUploadedPosterPreview(dataUrl);
+        setUploadedPosterUrl(dataUrl);
+        setImageUrl(dataUrl);
+        setSelectedTemplateId('template-custom');
+        toast.success('16:9 Poster validated & attached successfully!');
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePoster = () => {
+    setUploadedPosterPreview(null);
+    setUploadedPosterUrl('');
+    setPosterAspectError(null);
+  };
+
+  // Screenshot File Selection & Validation
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -108,7 +171,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
       return;
     }
 
-    const MAX_BYTES = 5 * 1024 * 1024; // 5MB limit
+    const MAX_BYTES = 5 * 1024 * 1024;
     if (file.size > MAX_BYTES) {
       toast.error(`File size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 5MB limit.`);
       return;
@@ -135,14 +198,14 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
   const currentAdData: AdData = {
     title: title || 'Your Campaign Headline',
     description: description || 'Describe your products, services, or special promotional offers here.',
-    imageUrl: imageUrl || undefined,
+    imageUrl: creationMode === 'upload' && uploadedPosterUrl ? uploadedPosterUrl : (imageUrl || undefined),
     ctaText: ctaText || 'Visit Business',
     targetCity: selectedLocation ? selectedLocation.formatted : 'All India',
     category: targetCategory,
     businessName: businessName,
   };
 
-  // Launch Automated Razorpay Checkout (UPI & Bank Transfer Only)
+  // Launch Automated Razorpay Checkout
   const handleAutomatedRazorpayPayment = async () => {
     setIsSubmitting(true);
 
@@ -152,13 +215,13 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
         businessName: businessName,
         title: title || `${businessName} Campaign`,
         description: description,
-        imageUrl: imageUrl,
+        imageUrl: creationMode === 'upload' && uploadedPosterUrl ? uploadedPosterUrl : imageUrl,
         ctaText: ctaText,
         targetCity: selectedLocation ? selectedLocation.formatted : 'All India',
         category: targetCategory,
         planId: selectedPlan.id,
         planName: selectedPlan.name,
-        templateId: selectedTemplateId,
+        templateId: creationMode === 'upload' ? 'template-custom' : selectedTemplateId,
         amount: selectedPlan.price,
         durationDays: selectedPlan.durationDays,
         utrNumber: utrNumber.trim() || 'AUTO_PAYMENT_PENDING',
@@ -288,13 +351,13 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
         businessName: businessName,
         title: title || `${businessName} Campaign`,
         description: description,
-        imageUrl: imageUrl,
+        imageUrl: creationMode === 'upload' && uploadedPosterUrl ? uploadedPosterUrl : imageUrl,
         ctaText: ctaText,
         targetCity: selectedLocation ? selectedLocation.formatted : 'All India',
         category: targetCategory,
         planId: selectedPlan.id,
         planName: selectedPlan.name,
-        templateId: selectedTemplateId,
+        templateId: creationMode === 'upload' ? 'template-custom' : selectedTemplateId,
         amount: selectedPlan.price,
         durationDays: selectedPlan.durationDays,
         utrNumber: utrNumber.trim() || 'SUBMITTED_WITH_SCREENSHOT',
@@ -323,7 +386,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
         <div className="flex flex-wrap items-center justify-between gap-2">
           {[
             { id: 1, name: 'Choose Plan' },
-            { id: 2, name: 'Choose Template' },
+            { id: 2, name: 'Create Poster' },
             { id: 3, name: 'Fill Details' },
             { id: 4, name: 'Live Preview' },
             { id: 5, name: 'Payment' },
@@ -429,53 +492,212 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
       )}
 
       {/* ==================================================== */}
-      {/* STEP 2: CHOOSE TEMPLATE                              */}
+      {/* STEP 2: CHOOSE HOW TO CREATE ADVERTISEMENT           */}
       {/* ==================================================== */}
       {step === 2 && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="text-center">
-            <h2 className="text-2xl font-extrabold text-gray-900">Select Advertisement Template</h2>
+            <h2 className="text-2xl font-extrabold text-gray-900">
+              Choose How You Want to Create Your Advertisement
+            </h2>
             <p className="mt-1 text-sm text-gray-500">
-              Choose from 8 professionally designed, locked templates. Layout and styling are platform-controlled.
+              Upload a professionally designed 16:9 horizontal banner or create one using built-in website templates.
             </p>
           </div>
 
+          {/* Equal Selection Cards */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {AD_TEMPLATES.map((tmpl) => {
-              const isSelected = selectedTemplateId === tmpl.id;
-              return (
-                <div
-                  key={tmpl.id}
-                  onClick={() => setSelectedTemplateId(tmpl.id)}
-                  className={`cursor-pointer rounded-2xl border-2 p-5 shadow-sm transition-all ${
-                    isSelected
-                      ? 'border-amber-600 bg-amber-50/50 ring-4 ring-amber-100'
-                      : 'border-gray-200 bg-white hover:border-blue-300'
-                  }`}
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <div>
-                      <h4 className="font-bold text-gray-900">{tmpl.name}</h4>
-                      <p className="text-xs text-gray-500">{tmpl.description}</p>
-                    </div>
-                    {isSelected && (
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-slate-950 font-semibold">
-                        <Check className="h-4 w-4" />
-                      </span>
-                    )}
-                  </div>
-                  {/* Template Live Preview Card */}
-                  <RenderAdTemplate templateId={tmpl.id} adData={currentAdData} />
+            {/* Option 1: Upload Your Own Poster */}
+            <div
+              onClick={() => setCreationMode('upload')}
+              className={`cursor-pointer rounded-2xl border-2 p-6 shadow-md transition-all ${
+                creationMode === 'upload'
+                  ? 'border-amber-600 bg-amber-50/40 ring-4 ring-amber-100'
+                  : 'border-gray-200 bg-white hover:border-amber-300'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
+                  <Upload className="h-6 w-6" />
                 </div>
-              );
-            })}
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-extrabold text-amber-900">
+                  Horizontal 16:9 Format
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Upload Your Own Poster</h3>
+              <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+                Upload a ready-made horizontal advertisement poster designed for desktop and mobile web banners.
+              </p>
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-gray-600">
+                <span>Recommended: 1920 × 1080 px</span>
+                {creationMode === 'upload' && <Check className="h-4 w-4 text-amber-600 font-bold" />}
+              </div>
+            </div>
+
+            {/* Option 2: Create Using Website Templates */}
+            <div
+              onClick={() => setCreationMode('template')}
+              className={`cursor-pointer rounded-2xl border-2 p-6 shadow-md transition-all ${
+                creationMode === 'template'
+                  ? 'border-amber-600 bg-amber-50/40 ring-4 ring-amber-100'
+                  : 'border-gray-200 bg-white hover:border-amber-300'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-extrabold text-blue-900">
+                  8 Built-in Designs
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Create Using Website Templates</h3>
+              <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+                Pick from 8 professionally styled, locked templates. Layout & styling are automatically managed.
+              </p>
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-gray-600">
+                <span>Instant Auto-Layout</span>
+                {creationMode === 'template' && <Check className="h-4 w-4 text-amber-600 font-bold" />}
+              </div>
+            </div>
           </div>
+
+          {/* DYNAMIC CONTENT BASED ON SELECTED CREATION MODE */}
+
+          {/* MODE A: UPLOAD CUSTOM 16:9 POSTER */}
+          {creationMode === 'upload' && (
+            <div className="rounded-2xl border border-amber-200 bg-white p-6 shadow-sm space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <Upload className="h-5 w-5 text-amber-600" /> Upload Poster Image (16:9 Format)
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Formats: JPG, PNG, WEBP (Max 5MB) | Aspect Ratio: <strong>16:9 Horizontal Banner</strong>
+                  </p>
+                </div>
+                <span className="rounded-lg bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800 border border-amber-200">
+                  Recommended: 1920 × 1080 px
+                </span>
+              </div>
+
+              {/* Upload Dropzone */}
+              {!uploadedPosterPreview && (
+                <div className="relative">
+                  <label className="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-amber-300 rounded-xl cursor-pointer bg-amber-50/30 hover:bg-amber-50/70 transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                      <Upload className="w-10 h-10 mb-3 text-amber-600" />
+                      <p className="mb-1 text-sm font-extrabold text-gray-800">
+                        Click to choose poster or drag & drop
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Must be horizontal 16:9 format (e.g. 1920 × 1080 px)
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/jpg"
+                      onChange={handlePosterFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
+
+              {/* Aspect Ratio Validation Error Alert */}
+              {posterAspectError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-start gap-3 text-xs text-red-900">
+                  <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <span className="font-extrabold text-red-800 block text-sm">
+                      Invalid Aspect Ratio Detected
+                    </span>
+                    <p className="text-xs leading-relaxed">{posterAspectError}</p>
+                    <p className="text-[11px] font-bold text-red-700">
+                      Please resize or crop your image to 16:9 horizontal orientation (Recommended: 1920 × 1080 px) and re-upload.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Uploaded 16:9 Poster Preview & Remove/Replace Button */}
+              {uploadedPosterPreview && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
+                      <Check className="h-4 w-4 text-emerald-600 font-bold" /> Poster Validated & Ready (16:9 Aspect Ratio)
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemovePoster}
+                      className="border-red-200 text-red-600 hover:bg-red-50 text-xs"
+                    >
+                      <X className="mr-1 h-3.5 w-3.5" /> Remove / Replace Poster
+                    </Button>
+                  </div>
+
+                  <div className="mx-auto max-w-lg overflow-hidden rounded-2xl border-2 border-amber-400 bg-black shadow-lg">
+                    <RenderAdTemplate
+                      templateId="template-custom"
+                      adData={currentAdData}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* MODE B: CHOOSE FROM 8 WEBSITE TEMPLATES */}
+          {creationMode === 'template' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {AD_TEMPLATES.map((tmpl) => {
+                  const isSelected = selectedTemplateId === tmpl.id;
+                  return (
+                    <div
+                      key={tmpl.id}
+                      onClick={() => setSelectedTemplateId(tmpl.id)}
+                      className={`cursor-pointer rounded-2xl border-2 p-5 shadow-sm transition-all ${
+                        isSelected
+                          ? 'border-amber-600 bg-amber-50/50 ring-4 ring-amber-100'
+                          : 'border-gray-200 bg-white hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="mb-3 flex items-center justify-between">
+                        <div>
+                          <h4 className="font-bold text-gray-900">{tmpl.name}</h4>
+                          <p className="text-xs text-gray-500">{tmpl.description}</p>
+                        </div>
+                        {isSelected && (
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-slate-950 font-semibold">
+                            <Check className="h-4 w-4" />
+                          </span>
+                        )}
+                      </div>
+                      <RenderAdTemplate templateId={tmpl.id} adData={currentAdData} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-between pt-4">
             <Button variant="outline" onClick={() => setStep(1)}>
               <ChevronLeft className="mr-1 h-4 w-4" /> Back to Plans
             </Button>
-            <Button onClick={() => setStep(3)} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold">
+            <Button
+              onClick={() => {
+                if (creationMode === 'upload' && !uploadedPosterUrl) {
+                  toast.error('Please upload a 16:9 horizontal poster image to proceed.');
+                  return;
+                }
+                setStep(3);
+              }}
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold"
+            >
               Next: Fill Details <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
@@ -570,17 +792,19 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
               />
             </div>
 
-            {/* Image / Logo URL */}
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                Business Logo / Banner Image URL
-              </label>
-              <Input
-                placeholder="https://example.com/logo.png"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-            </div>
+            {/* Image / Logo URL (Hidden if user uploaded their own poster) */}
+            {creationMode !== 'upload' && (
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  Business Logo / Banner Image URL
+                </label>
+                <Input
+                  placeholder="https://example.com/logo.png"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                />
+              </div>
+            )}
 
             {/* CTA Button Text */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -632,7 +856,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
 
           <div className="flex justify-between pt-4">
             <Button variant="outline" onClick={() => setStep(2)}>
-              <ChevronLeft className="mr-1 h-4 w-4" /> Back to Templates
+              <ChevronLeft className="mr-1 h-4 w-4" /> Back to Poster Choice
             </Button>
             <Button
               onClick={() => {
@@ -679,9 +903,9 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                   <span className="font-semibold text-gray-800">{selectedPlan.durationLabel}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Selected Template:</span>
-                  <span className="font-semibold text-gray-800">
-                    {AD_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name}
+                  <span className="text-gray-500">Poster Mode:</span>
+                  <span className="font-semibold text-amber-700">
+                    {creationMode === 'upload' ? 'Uploaded Custom 16:9 Poster' : 'Website Built-in Template'}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -696,7 +920,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                 </div>
                 <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
                   <span className="text-base font-bold text-gray-900">Total Amount:</span>
-                  <span className="text-3xl font-black text-amber-600">₹{selectedPlan.price}</span>
+                  <span className="text-3xl font-black text-blue-600">₹{selectedPlan.price}</span>
                 </div>
               </div>
             </div>
@@ -709,7 +933,10 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                 </h3>
                 <span className="text-xs text-gray-400">Exact layout representation</span>
               </div>
-              <RenderAdTemplate templateId={selectedTemplateId} adData={currentAdData} />
+              <RenderAdTemplate
+                templateId={creationMode === 'upload' ? 'template-custom' : selectedTemplateId}
+                adData={currentAdData}
+              />
             </div>
           </div>
 
