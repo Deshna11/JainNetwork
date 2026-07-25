@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { User } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { logout } from '@/actions/auth';
 import type { Profile } from '@/types/database';
@@ -101,12 +101,16 @@ export function Navbar() {
                   <Link href="/dashboard/profile" className="w-full">Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer text-red-600">
-                  <form action={logout} className="w-full">
-                    <button type="submit" className="w-full text-left">
-                      Logout
-                    </button>
-                  </form>
+                <DropdownMenuItem 
+                  className="cursor-pointer text-red-600"
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    startTransition(() => {
+                      logout();
+                    });
+                  }}
+                >
+                  Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -159,15 +163,17 @@ export function Navbar() {
                   >
                     Profile
                   </Link>
-                  <form action={logout}>
-                    <button
-                      type="submit"
-                      onClick={() => setMobileOpen(false)}
-                      className="w-full text-left rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      Logout
-                    </button>
-                  </form>
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      startTransition(() => {
+                        logout();
+                      });
+                    }}
+                    className="w-full text-left rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Logout
+                  </button>
                 </>
               ) : (
                 <>
