@@ -263,7 +263,7 @@ export default async function HomePage() {
                     {/* Premium Metallic Gold Verified Badge */}
                     <div
                       className="absolute bottom-1.5 right-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-[#B8860B] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold shadow-md border-2 border-slate-950"
-                      title="Founder & AI Engineer"
+                      title="Brand Ambassador & AI Engineer"
                     >
                       <ShieldCheck className="h-4 w-4 text-slate-950" />
                     </div>
@@ -274,7 +274,7 @@ export default async function HomePage() {
                 <div className="flex-1 space-y-4">
                   <div>
                     <span className="text-xs font-black uppercase tracking-widest text-[#D4AF37]">
-                      Founder & Lead Architect
+                      Brand Ambassador
                     </span>
                     <h3 className="mt-1 text-2xl sm:text-3xl font-black text-white tracking-tight">
                       Darshan Bharatji Oswal
