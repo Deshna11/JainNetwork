@@ -6,9 +6,17 @@ import { generateSlug } from '@/utils/helpers';
 import { ITEMS_PER_PAGE, POPULAR_CITIES } from '@/lib/constants';
 import { revalidatePath } from 'next/cache';
 
+let categoriesCache: { data: any[]; timestamp: number } | null = null;
+const CACHE_TTL_MS = 60 * 1000; // Cache for 60 seconds
+
 // Get all active categories
 export async function getCategories() {
   try {
+    const now = Date.now();
+    if (categoriesCache && now - categoriesCache.timestamp < CACHE_TTL_MS) {
+      return categoriesCache.data;
+    }
+
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('categories')
@@ -17,7 +25,9 @@ export async function getCategories() {
       .order('name');
 
     if (error) return [];
-    return data || [];
+    const result = data || [];
+    categoriesCache = { data: result, timestamp: now };
+    return result;
   } catch (err) {
     console.error('Error in getCategories:', err);
     return [];
@@ -316,9 +326,16 @@ export async function getHomeStats() {
   }
 }
 
+let citiesCache: { data: string[]; timestamp: number } | null = null;
+
 // Get distinct cities for filter dropdown (combines popular cities with registered DB cities)
 export async function getDistinctCities() {
   try {
+    const now = Date.now();
+    if (citiesCache && now - citiesCache.timestamp < CACHE_TTL_MS) {
+      return citiesCache.data;
+    }
+
     const supabase = await createClient();
     const { data } = await supabase
       .from('businesses')
@@ -327,6 +344,7 @@ export async function getDistinctCities() {
 
     const dbCities = data?.map((b) => b.city).filter(Boolean) || [];
     const combined = Array.from(new Set([...POPULAR_CITIES, ...dbCities])).sort();
+    citiesCache = { data: combined, timestamp: now };
     return combined;
   } catch (err) {
     console.error('Error in getDistinctCities:', err);
