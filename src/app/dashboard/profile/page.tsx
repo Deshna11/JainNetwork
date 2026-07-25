@@ -55,7 +55,7 @@ export default async function ProfilePage() {
             <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <dt className="text-sm font-medium text-gray-500">Business Name</dt>
-                <dd className="mt-1 text-lg font-semibold text-gray-900">{business.name}</dd>
+                <dd className="mt-1 text-lg font-semibold text-gray-900">{business.business_name}</dd>
               </div>
               <div className="sm:col-span-2">
                 <dt className="text-sm font-medium text-gray-500">Description</dt>
