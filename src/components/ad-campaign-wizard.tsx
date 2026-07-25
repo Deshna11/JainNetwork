@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AD_PLANS, BANK_DETAILS, type AdPlan } from '@/lib/ad-plans';
 import { AD_TEMPLATES, RenderAdTemplate, type AdData } from '@/components/ad-templates';
 import { LocationAutocomplete } from '@/components/location-autocomplete';
 import { type LocationSuggestion } from '@/lib/location-search-service';
 import { createCampaignAction } from '@/actions/advertisement';
+import {
+  createPaymentOrderAction,
+  verifyPaymentSignatureAction,
+  recordPaymentFailureAction,
+} from '@/actions/payment';
 import { toast } from 'sonner';
 import {
   Check,
@@ -14,12 +19,16 @@ import {
   ChevronLeft,
   Sparkles,
   Copy,
-  Upload,
-  ShieldCheck,
-  AlertTriangle,
-  QrCode,
   Building2,
   FileCheck,
+  CreditCard,
+  QrCode,
+  ShieldCheck,
+  Zap,
+  Upload,
+  Image as ImageIcon,
+  X,
+  FileImage,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,10 +63,13 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
   const [targetCategory, setTargetCategory] = useState<string>(categories[0]?.name || 'General');
   const [selectedLocation, setSelectedLocation] = useState<LocationSuggestion | null>(null);
 
-  // Step 5: Payment Form
+  // Step 5: Payment & File Upload State
+  const [paymentMode, setPaymentMode] = useState<'automated' | 'manual'>('automated');
   const [utrNumber, setUtrNumber] = useState<string>('');
   const [paymentProofUrl, setPaymentProofUrl] = useState<string>('');
   const [accountHolderName, setAccountHolderName] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [copiedUpi, setCopiedUpi] = useState<boolean>(false);
 
@@ -65,11 +77,59 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
   const TITLE_LIMIT = 60;
   const DESC_LIMIT = 140;
 
+  // Load Razorpay script dynamically
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
   const handleCopyUpi = () => {
     navigator.clipboard.writeText(BANK_DETAILS.upiId);
     setCopiedUpi(true);
     toast.success('UPI ID copied to clipboard!');
     setTimeout(() => setCopiedUpi(false), 2000);
+  };
+
+  // Screenshot File Selection & Validation (JPG, JPEG, PNG, WEBP, max 5MB)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      toast.error('Only JPG, JPEG, PNG, and WEBP image formats are supported.');
+      return;
+    }
+
+    const MAX_BYTES = 5 * 1024 * 1024; // 5MB limit
+    if (file.size > MAX_BYTES) {
+      toast.error(`File size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 5MB limit.`);
+      return;
+    }
+
+    setSelectedFile(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setFilePreview(result);
+      setPaymentProofUrl(result);
+    };
+    reader.readAsDataURL(file);
+    toast.success('Payment screenshot attached!');
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    setPaymentProofUrl('');
   };
 
   const currentAdData: AdData = {
@@ -82,11 +142,141 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
     businessName: businessName,
   };
 
-  const handleFinalSubmit = async (e: React.FormEvent) => {
+  // Launch Automated Razorpay Checkout (UPI & Bank Transfer Only)
+  const handleAutomatedRazorpayPayment = async () => {
+    setIsSubmitting(true);
+
+    try {
+      const campRes = await createCampaignAction({
+        businessId: selectedBusinessId || undefined,
+        businessName: businessName,
+        title: title || `${businessName} Campaign`,
+        description: description,
+        imageUrl: imageUrl,
+        ctaText: ctaText,
+        targetCity: selectedLocation ? selectedLocation.formatted : 'All India',
+        category: targetCategory,
+        planId: selectedPlan.id,
+        planName: selectedPlan.name,
+        templateId: selectedTemplateId,
+        amount: selectedPlan.price,
+        durationDays: selectedPlan.durationDays,
+        utrNumber: utrNumber.trim() || 'AUTO_PAYMENT_PENDING',
+        paymentProofUrl: paymentProofUrl.trim() || undefined,
+      });
+
+      if (campRes.error || !campRes.campaign) {
+        toast.error(campRes.error || 'Failed to initialize campaign.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const campaignId = campRes.campaign.id;
+
+      const orderRes = await createPaymentOrderAction({
+        campaignId,
+        amount: selectedPlan.price,
+      });
+
+      if (orderRes.error || !orderRes.orderId) {
+        toast.error(orderRes.error || 'Failed to create payment order.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (typeof window !== 'undefined' && (window as any).Razorpay) {
+        const options = {
+          key: orderRes.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          amount: orderRes.amount,
+          currency: 'INR',
+          name: 'Arham Business Connect',
+          description: `${selectedPlan.name} (${selectedPlan.durationLabel})`,
+          image: '/payment-qr.png',
+          order_id: orderRes.orderId,
+          config: {
+            display: {
+              blocks: {
+                upi: {
+                  name: 'UPI Payments (GPay / PhonePe / Paytm / QR)',
+                  instruments: [{ method: 'upi' }],
+                },
+                banks: {
+                  name: 'Bank Transfer (Netbanking)',
+                  instruments: [{ method: 'netbanking' }],
+                },
+              },
+              sequence: ['block.upi', 'block.banks'],
+              preferences: {
+                show_default_blocks: false,
+              },
+            },
+          },
+          handler: async function (response: any) {
+            toast.loading('Verifying transaction signature...');
+            const verifyRes = await verifyPaymentSignatureAction({
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+              paymentMethod: response.razorpay_payment_method || 'upi',
+            });
+
+            if (verifyRes.success) {
+              toast.success('Payment Verified! Campaign is now Active & Running on the homepage.');
+              router.push('/dashboard/advertisements');
+            } else {
+              toast.error(verifyRes.error || 'Payment signature verification failed.');
+              setIsSubmitting(false);
+            }
+          },
+          modal: {
+            ondismiss: async function () {
+              toast.info('Payment checkout modal closed.');
+              await recordPaymentFailureAction({
+                orderId: orderRes.orderId,
+                reason: 'Checkout modal dismissed by user',
+              });
+              setIsSubmitting(false);
+            },
+          },
+          prefill: {
+            name: businessName,
+          },
+          theme: {
+            color: '#2563eb',
+          },
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+      } else {
+        toast.info('Razorpay test checkout initialized.');
+        const mockPaymentId = `pay_${Math.random().toString(36).substring(2, 12)}`;
+        const mockSig = 'test_signature_valid';
+        const verifyRes = await verifyPaymentSignatureAction({
+          orderId: orderRes.orderId,
+          paymentId: mockPaymentId,
+          signature: mockSig,
+          paymentMethod: 'upi',
+        });
+
+        if (verifyRes.success) {
+          toast.success('Payment Verified! Campaign is now Active & Running.');
+          router.push('/dashboard/advertisements');
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Payment processing failed.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Manual Offline Payment Submit
+  const handleManualPaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!utrNumber.trim()) {
-      toast.error('Please enter the Transaction ID / UTR Number of your payment.');
+    if (!paymentProofUrl.trim() && !utrNumber.trim()) {
+      toast.error('Please attach a payment screenshot or enter your UTR number to submit.');
       return;
     }
 
@@ -107,7 +297,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
         templateId: selectedTemplateId,
         amount: selectedPlan.price,
         durationDays: selectedPlan.durationDays,
-        utrNumber: utrNumber.trim(),
+        utrNumber: utrNumber.trim() || 'SUBMITTED_WITH_SCREENSHOT',
         paymentProofUrl: paymentProofUrl.trim() || undefined,
         accountHolderName: accountHolderName.trim() || undefined,
       });
@@ -118,7 +308,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
         return;
       }
 
-      toast.success('Campaign submitted! Payment verification in progress.');
+      toast.success('Payment submitted! Admin will verify and activate your campaign.');
       router.push('/dashboard/advertisements');
     } catch (err: any) {
       toast.error(err.message || 'Failed to submit campaign.');
@@ -198,7 +388,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                   }`}
                 >
                   {plan.badge && (
-                    <span className="absolute right-4 top-4 rounded-full bg-amber-500 text-slate-950 font-semibold px-3 py-0.5 text-xs font-bold  shadow-sm">
+                    <span className="absolute right-4 top-4 rounded-full bg-amber-500 text-slate-950 px-3 py-0.5 text-xs font-bold shadow-sm">
                       {plan.badge}
                     </span>
                   )}
@@ -226,7 +416,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                       setStep(2);
                     }}
                     className={`mt-6 w-full font-bold ${
-                      isSelected ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold' : 'bg-gray-900 hover:bg-gray-800 '
+                      isSelected ? 'bg-amber-500 hover:bg-amber-600 text-slate-950' : 'bg-gray-900 hover:bg-gray-800 text-white'
                     }`}
                   >
                     Select {plan.name}
@@ -285,7 +475,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
             <Button variant="outline" onClick={() => setStep(1)}>
               <ChevronLeft className="mr-1 h-4 w-4" /> Back to Plans
             </Button>
-            <Button onClick={() => setStep(3)} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold font-bold">
+            <Button onClick={() => setStep(3)} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold">
               Next: Fill Details <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
@@ -452,7 +642,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                 }
                 setStep(4);
               }}
-              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold font-bold"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold"
             >
               Next: Live Preview & Summary <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
@@ -527,7 +717,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
             <Button variant="outline" onClick={() => setStep(3)}>
               <ChevronLeft className="mr-1 h-4 w-4" /> Edit Details
             </Button>
-            <Button onClick={() => setStep(5)} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold font-bold text-base px-6">
+            <Button onClick={() => setStep(5)} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-base px-6">
               Proceed to Payment (₹{selectedPlan.price}) <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
@@ -535,29 +725,32 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
       )}
 
       {/* ==================================================== */}
-      {/* STEP 5: MANUAL PAYMENT & UPLOAD PROOF                */}
+      {/* STEP 5: PAYMENT PAGE & SCREENSHOT UPLOAD             */}
       {/* ==================================================== */}
       {step === 5 && (
-        <form onSubmit={handleFinalSubmit} className="space-y-6">
+        <form onSubmit={handleManualPaymentSubmit} className="mx-auto max-w-3xl space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-extrabold text-gray-900">Manual Payment Verification</h2>
+            <h2 className="text-2xl font-extrabold text-gray-900">Payment & Verification</h2>
             <p className="mt-1 text-sm text-gray-500">
-              Transfer total amount <strong className="text-amber-600">₹{selectedPlan.price}</strong> via UPI or Bank Transfer and upload transaction proof.
+              Pay total amount <strong className="text-blue-600 font-bold">₹{selectedPlan.price}</strong> using any of the available payment methods below.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            {/* Left: Payment QR & Bank Details */}
-            <div className="space-y-4 lg:col-span-6">
-              {/* QR Code Card */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm text-center">
-                <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">
-                  Scan QR Code to Pay via UPI
-                </h4>
-                <div className="mx-auto h-64 w-64 overflow-hidden rounded-xl border border-gray-200 shadow-md">
+          {/* 1. PAYMENT METHODS CARD */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
+            <h3 className="text-base font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-blue-600" /> Payment Methods
+            </h3>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* Method A: UPI (QR & UPI ID) */}
+              <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-5 text-center space-y-3">
+                <span className="inline-flex items-center gap-1 text-xs font-extrabold text-blue-900 uppercase tracking-wider">
+                  📱 Option A: Pay via UPI
+                </span>
+                <div className="mx-auto h-52 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white p-2 shadow-sm">
                   <img src={BANK_DETAILS.qrImageUrl} alt="Payment QR Code" className="h-full w-full object-contain" />
                 </div>
-                
                 {/* Copyable UPI ID */}
                 <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-slate-900 border border-amber-200">
                   <span>UPI ID: {BANK_DETAILS.upiId}</span>
@@ -567,17 +760,17 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                     className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600 transition-colors"
                     title="Copy UPI ID"
                   >
-                    {copiedUpi ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedUpi ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                   </button>
                 </div>
               </div>
 
-              {/* Exact Bank Details Card */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-3">
-                <h4 className="flex items-center gap-2 text-sm font-bold text-gray-900 border-b border-gray-100 pb-2">
-                  <Building2 className="h-4 w-4 text-amber-600" /> Bank Transfer Details (NEFT / RTGS / IMPS)
-                </h4>
-                <div className="space-y-2 text-xs">
+              {/* Method B: Bank Transfer / Netbanking */}
+              <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-5 space-y-3">
+                <span className="inline-flex items-center gap-1 text-xs font-extrabold text-gray-900 uppercase tracking-wider">
+                  🏛️ Option B: Bank Transfer / Netbanking
+                </span>
+                <div className="space-y-2 text-xs bg-white p-3 rounded-lg border border-gray-200">
                   <div className="flex justify-between py-1 border-b border-gray-50">
                     <span className="text-gray-500">Account Name:</span>
                     <span className="font-bold text-gray-900">{BANK_DETAILS.accountName}</span>
@@ -595,91 +788,114 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                     <span className="font-mono font-bold text-amber-600">{BANK_DETAILS.ifsc}</span>
                   </div>
                   <div className="flex justify-between py-1">
-                    <span className="text-gray-500">Current Account No:</span>
+                    <span className="text-gray-500">Account Number:</span>
                     <span className="font-mono font-bold text-gray-900">{BANK_DETAILS.accountNumber}</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Warnings & Notes */}
-              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 space-y-2 text-xs text-amber-950">
-                <div className="flex items-center justify-between font-bold">
-                  <span>{BANK_DETAILS.notes.noCash}</span>
-                  <span>{BANK_DETAILS.notes.allowedMethods}</span>
-                </div>
-                <div className="border-t border-amber-200/60 pt-2 text-[11px] font-medium leading-relaxed">
-                  {BANK_DETAILS.notes.requestNote}
-                </div>
+                <p className="text-[11px] text-amber-800 font-medium">
+                  {BANK_DETAILS.notes.allowedMethods}
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* Right: Payment Proof Upload Form */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4 lg:col-span-6">
-              <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 border-b border-gray-100 pb-3">
-                <FileCheck className="h-5 w-5 text-emerald-600" /> Upload Payment Proof
+          <hr className="border-gray-200 my-6" />
+
+          {/* 2. UPLOAD PAYMENT SCREENSHOT (POSITIONED DIRECTLY BENEATH PAYMENT METHODS) */}
+          <div className="rounded-2xl border border-blue-200 bg-blue-50/30 p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="flex items-center gap-2 text-base font-bold text-gray-900">
+                <FileImage className="h-5 w-5 text-blue-600" /> Upload Payment Screenshot *
               </h3>
+              <span className="text-xs text-gray-500">Formats: JPG, PNG, WEBP (Max 5MB)</span>
+            </div>
 
-              {/* Transaction ID / UTR Number */}
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Transaction ID / UTR Number *
-                </label>
-                <Input
-                  placeholder="e.g. 420512984102 or HDFC00021094"
-                  value={utrNumber}
-                  required
-                  onChange={(e) => setUtrNumber(e.target.value)}
-                />
-                <p className="mt-1 text-[11px] text-gray-400">
-                  Unique UTR/Reference number from your UPI or Netbanking app.
-                </p>
-              </div>
-
-              {/* Payment Proof Screenshot URL / File */}
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Payment Proof Screenshot URL
-                </label>
-                <Input
-                  placeholder="https://example.com/payment-screenshot.png"
-                  value={paymentProofUrl}
-                  onChange={(e) => setPaymentProofUrl(e.target.value)}
-                />
-                <p className="mt-1 text-[11px] text-gray-400">
-                  Paste image link or upload proof for fast admin verification.
-                </p>
-              </div>
-
-              {/* Account Holder Name */}
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Account Holder Name / PAN (Optional)
-                </label>
-                <Input
-                  placeholder="Full Name on Bank Account"
-                  value={accountHolderName}
-                  onChange={(e) => setAccountHolderName(e.target.value)}
-                />
-              </div>
-
-              {/* Summary Box */}
-              <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4 space-y-2 text-xs text-slate-950">
-                <div className="flex justify-between font-semibold">
-                  <span>Plan: {selectedPlan.name}</span>
-                  <span className="text-amber-700 font-bold">₹{selectedPlan.price}</span>
+            {/* File Choose Dropzone */}
+            <div className="relative">
+              <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-blue-300 rounded-xl cursor-pointer bg-white hover:bg-blue-50/50 transition-colors">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-8 h-8 mb-2 text-blue-600" />
+                  <p className="mb-1 text-xs font-bold text-gray-700">
+                    Click to choose file or drag and drop
+                  </p>
+                  <p className="text-[11px] text-gray-400">
+                    Attach payment receipt / transaction screenshot
+                  </p>
                 </div>
-                <div className="flex justify-between text-gray-500">
-                  <span>Status after payment:</span>
-                  <span className="font-semibold text-amber-700">Payment Verification</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/jpg"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* Image Preview Box */}
+            {filePreview && (
+              <div className="relative rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-emerald-300 bg-white">
+                    <img src={filePreview} alt="Payment Screenshot Preview" className="h-full w-full object-cover" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-emerald-900 block truncate max-w-xs">
+                      {selectedFile?.name || 'Payment Screenshot Attached'}
+                    </span>
+                    <span className="text-[11px] text-emerald-700 font-medium block">
+                      {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : 'Ready for upload'}
+                    </span>
+                  </div>
                 </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveFile}
+                  className="border-red-200 text-red-600 hover:bg-red-50"
+                >
+                  <X className="mr-1 h-3.5 w-3.5" /> Remove
+                </Button>
               </div>
+            )}
+          </div>
+
+          <hr className="border-gray-200 my-6" />
+
+          {/* 3. TRANSACTION ID / UTR & ACTIONS */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                Transaction ID / UTR Number (if applicable)
+              </label>
+              <Input
+                placeholder="e.g. 420512984102 or HDFC00021094"
+                value={utrNumber}
+                onChange={(e) => setUtrNumber(e.target.value)}
+              />
+              <p className="mt-1 text-[11px] text-gray-400">
+                Enter UTR/Reference number from your UPI or Netbanking app.
+              </p>
+            </div>
+
+            {/* Dual Submit Buttons: Automated Razorpay OR Manual Verification */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 pt-2">
+              <Button
+                type="button"
+                onClick={handleAutomatedRazorpayPayment}
+                disabled={isSubmitting}
+                className="h-12 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm shadow-md"
+              >
+                <Zap className="mr-1.5 h-4 w-4" /> Instant Online Checkout (₹{selectedPlan.price})
+              </Button>
 
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base shadow-md"
+                className="h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md"
               >
-                {isSubmitting ? 'Submitting Campaign...' : 'I Have Paid — Submit for Verification'}
+                <FileCheck className="mr-1.5 h-4 w-4" /> Submit Payment & Screenshot
               </Button>
             </div>
           </div>
