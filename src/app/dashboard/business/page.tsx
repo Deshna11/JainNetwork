@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export const metadata = {
-  title: 'My Business — Jain Network',
+  title: 'My Business — Arham Business Connect',
 };
 
 export default async function MyBusinessPage() {
@@ -18,7 +18,7 @@ export default async function MyBusinessPage() {
         <h1 className="text-2xl font-bold text-gray-900">My Business</h1>
         <EmptyState
           title="No business registered"
-          description="Register your business to get listed on the Jain Network directory."
+          description="Register your business to get listed on the Arham Business Connect directory."
           actionLabel="Register Business"
           actionHref="/dashboard/business/register"
         />

@@ -189,7 +189,7 @@ export function SearchBar({ categories, basePath = '/businesses' }: SearchBarPro
 
         {/* Column 4: Search & Clear Action Buttons (lg:col-span-2) */}
         <div className="flex items-center gap-2 lg:col-span-2">
-          <Button type="submit" className="h-10 flex-1 bg-blue-600 hover:bg-blue-700 font-semibold shadow-sm">
+          <Button type="submit" className="h-10 flex-1 bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600 font-semibold shadow-sm">
             <Filter className="mr-1.5 h-4 w-4" />
             Search
           </Button>
@@ -207,9 +207,9 @@ export function SearchBar({ categories, basePath = '/businesses' }: SearchBarPro
           <span className="font-medium text-gray-500">Active Filters:</span>
 
           {query && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-blue-700">
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700">
               Keyword: &quot;{query}&quot;
-              <button type="button" onClick={removeQuery} className="hover:text-blue-900">
+              <button type="button" onClick={removeQuery} className="hover:text-slate-900">
                 <X className="h-3 w-3" />
               </button>
             </span>

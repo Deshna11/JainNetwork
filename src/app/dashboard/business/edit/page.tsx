@@ -3,7 +3,7 @@ import { getMyBusiness, getCategories } from '@/actions/business';
 import { BusinessEditForm } from '@/components/business-edit-form';
 
 export const metadata = {
-  title: 'Edit Business — Jain Network',
+  title: 'Edit Business — Arham Business Connect',
 };
 
 export default async function EditBusinessPage() {

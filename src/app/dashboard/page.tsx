@@ -60,7 +60,7 @@ export default async function DashboardPage() {
             <div className="text-center py-6">
               <p className="text-gray-500">You haven&apos;t registered a business yet.</p>
               <Link href="/dashboard/business/register" className="mt-4 inline-block">
-                <Button className="bg-blue-600 hover:bg-blue-700">Register Business</Button>
+                <Button className="bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600">Register Business</Button>
               </Link>
             </div>
           )}
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
         {business ? (
           <>
             <Link href="/dashboard/business/edit">
-              <Card className="h-full transition-all hover:shadow-md hover:border-blue-200 cursor-pointer">
+              <Card className="h-full transition-all hover:shadow-md hover:border-amber-200 cursor-pointer">
                 <CardContent className="flex items-center gap-3 p-5">
                   <span className="text-2xl">✏️</span>
                   <div>
@@ -83,7 +83,7 @@ export default async function DashboardPage() {
               </Card>
             </Link>
             <Link href="/dashboard/advertisements/create">
-              <Card className="h-full transition-all hover:shadow-md hover:border-blue-200 cursor-pointer">
+              <Card className="h-full transition-all hover:shadow-md hover:border-amber-200 cursor-pointer">
                 <CardContent className="flex items-center gap-3 p-5">
                   <span className="text-2xl">📢</span>
                   <div>
@@ -96,7 +96,7 @@ export default async function DashboardPage() {
           </>
         ) : (
           <Link href="/dashboard/business/register">
-            <Card className="h-full transition-all hover:shadow-md hover:border-blue-200 cursor-pointer">
+            <Card className="h-full transition-all hover:shadow-md hover:border-amber-200 cursor-pointer">
               <CardContent className="flex items-center gap-3 p-5">
                 <span className="text-2xl">🏢</span>
                 <div>
@@ -108,7 +108,7 @@ export default async function DashboardPage() {
           </Link>
         )}
         <Link href="/dashboard/search">
-          <Card className="h-full transition-all hover:shadow-md hover:border-blue-200 cursor-pointer">
+          <Card className="h-full transition-all hover:shadow-md hover:border-amber-200 cursor-pointer">
             <CardContent className="flex items-center gap-3 p-5">
               <span className="text-2xl">🔍</span>
               <div>

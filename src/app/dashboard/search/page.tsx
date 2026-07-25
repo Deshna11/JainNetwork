@@ -11,7 +11,7 @@ interface PageProps {
 }
 
 export const metadata = {
-  title: 'Search Businesses — Jain Network',
+  title: 'Search Businesses — Arham Business Connect',
 };
 
 export default async function DashboardSearchPage({ searchParams }: PageProps) {

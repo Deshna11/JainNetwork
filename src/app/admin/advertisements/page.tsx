@@ -15,7 +15,7 @@ export default async function AdminAdvertisementsPage() {
       <div className="flex items-center justify-between border-b border-gray-200 pb-4">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-black text-gray-900">
-            <ShieldCheck className="h-6 w-6 text-blue-600" /> Admin: Advertisement Campaigns
+            <ShieldCheck className="h-6 w-6 text-amber-600" /> Admin: Advertisement Campaigns
           </h1>
           <p className="mt-1 text-xs text-gray-500">
             Verify manual UPI/Bank transfer payments and approve sponsored homepage campaigns.

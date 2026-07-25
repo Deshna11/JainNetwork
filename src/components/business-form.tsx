@@ -136,7 +136,7 @@ export function BusinessRegisterForm({ categories }: BusinessFormProps) {
 
           <Button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 sm:w-auto"
+            className="w-full bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600 sm:w-auto"
             disabled={loading}
           >
             {loading ? 'Registering...' : 'Register Business'}

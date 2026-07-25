@@ -3,7 +3,7 @@ import { getMyBusiness, getCategories } from '@/actions/business';
 import { BusinessRegisterForm } from '@/components/business-form';
 
 export const metadata = {
-  title: 'Register Business — Jain Network',
+  title: 'Register Business — Arham Business Connect',
 };
 
 export default async function RegisterBusinessPage() {

@@ -13,7 +13,7 @@ interface PageProps {
 }
 
 export const metadata = {
-  title: 'Browse Businesses — Jain Network',
+  title: 'Browse Businesses — Arham Business Connect',
   description: 'Search and discover Jain businesses across India.',
 };
 

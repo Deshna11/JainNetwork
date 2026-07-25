@@ -46,10 +46,8 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-            <span className="text-sm font-bold text-white">JN</span>
-          </div>
-          <span className="text-lg font-semibold text-gray-900">Jain Network</span>
+          <img src="/logo.jpg" alt="Arham Business Connect" className="h-10 w-auto" />
+          <span className="text-lg font-semibold text-gray-900 hidden sm:inline-block">Arham Business Connect</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -60,7 +58,7 @@ export function Navbar() {
               href={link.href}
               className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 isActive(link.href)
-                  ? 'text-blue-600'
+                  ? 'text-amber-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -96,7 +94,7 @@ export function Navbar() {
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                <Button size="sm" className="bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600">
                   Register
                 </Button>
               </Link>
@@ -121,7 +119,7 @@ export function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                     isActive(link.href)
-                      ? 'bg-blue-50 text-blue-600'
+                      ? 'bg-amber-50 text-amber-600'
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -160,7 +158,7 @@ export function Navbar() {
                   <Link
                     href="/register"
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                    className="rounded-md px-3 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50"
                   >
                     Register
                   </Link>

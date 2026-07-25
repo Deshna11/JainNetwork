@@ -85,7 +85,7 @@ export function MultiSelectDropdown({
         </span>
         <div className="flex items-center gap-1">
           {selectedCount > 0 && (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-xs font-semibold text-amber-700">
               {selectedCount}
             </span>
           )}
@@ -104,7 +104,7 @@ export function MultiSelectDropdown({
               placeholder={placeholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-md border border-gray-200 bg-gray-50 py-1.5 pl-8 pr-3 text-xs focus:border-blue-500 focus:bg-white focus:outline-none"
+              className="w-full rounded-md border border-gray-200 bg-gray-50 py-1.5 pl-8 pr-3 text-xs focus:border-amber-500 focus:bg-white focus:outline-none"
             />
             {searchTerm && (
               <button
@@ -122,7 +122,7 @@ export function MultiSelectDropdown({
             <button
               type="button"
               onClick={handleSelectAll}
-              className="font-medium text-blue-600 hover:text-blue-800"
+              className="font-medium text-amber-600 hover:text-amber-800"
             >
               Select All
             </button>
@@ -147,14 +147,14 @@ export function MultiSelectDropdown({
                     key={option.value}
                     onClick={() => toggleOption(option.value)}
                     className={`flex cursor-pointer items-center justify-between rounded-md px-2.5 py-1.5 text-xs transition-colors ${
-                      isSelected ? 'bg-blue-50 text-blue-900 font-medium' : 'hover:bg-gray-50 text-gray-700'
+                      isSelected ? 'bg-amber-50 text-slate-900 font-medium' : 'hover:bg-gray-50 text-gray-700'
                     }`}
                   >
                     <div className="flex items-center gap-2 overflow-hidden">
                       <div
                         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
                           isSelected
-                            ? 'border-blue-600 bg-blue-600 text-white'
+                            ? 'border-amber-600 bg-amber-500 text-slate-950 font-semibold'
                             : 'border-gray-300 bg-white'
                         }`}
                       >

@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Jain Network — Business Directory',
+  title: 'Arham Business Connect — Business Directory',
   description:
     'Discover and connect with trusted Jain businesses across India. Register your business, browse listings, and grow your network.',
 };

@@ -51,8 +51,8 @@ export function CreateAdForm({ categories }: CreateAdFormProps) {
       </CardHeader>
       <CardContent>
         {/* Payment placeholder */}
-        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <p className="text-sm text-blue-800">
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm text-amber-800">
             💳 Payment integration coming in Phase 2. Advertisements are currently free.
           </p>
         </div>
@@ -91,7 +91,7 @@ export function CreateAdForm({ categories }: CreateAdFormProps) {
 
           <Button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 sm:w-auto"
+            className="w-full bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600 sm:w-auto"
             disabled={loading}
           >
             {loading ? 'Creating...' : 'Create Advertisement'}

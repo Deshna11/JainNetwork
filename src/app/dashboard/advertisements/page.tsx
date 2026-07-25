@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'My Advertisements — Jain Network',
+  title: 'My Advertisements — Arham Business Connect',
 };
 
 export default async function MyAdvertisementsPage() {
@@ -32,7 +32,7 @@ export default async function MyAdvertisementsPage() {
           </p>
         </div>
         <Link href="/dashboard/advertisements/create">
-          <Button className="bg-blue-600 hover:bg-blue-700 font-bold text-white shadow-sm">
+          <Button className="bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600 font-bold  shadow-sm">
             <PlusCircle className="mr-1.5 h-4 w-4" /> Create New Campaign
           </Button>
         </Link>
@@ -105,7 +105,7 @@ export default async function MyAdvertisementsPage() {
                           </span>
                         )}
                         {camp.status === 'approved' && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 border border-blue-200">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-200">
                             <CheckCircle2 className="h-3.5 w-3.5" /> Approved
                           </span>
                         )}
@@ -129,7 +129,7 @@ export default async function MyAdvertisementsPage() {
                       </div>
                       <div className="rounded-xl bg-gray-50 p-3">
                         <span className="text-gray-400 block font-medium">Remaining</span>
-                        <span className="font-bold text-blue-600">{remainingDays} Days Left</span>
+                        <span className="font-bold text-amber-600">{remainingDays} Days Left</span>
                       </div>
                       <div className="rounded-xl bg-gray-50 p-3">
                         <span className="text-gray-400 block font-medium">Target City</span>
@@ -141,7 +141,7 @@ export default async function MyAdvertisementsPage() {
                     <div className="grid grid-cols-3 gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3 text-center">
                       <div>
                         <span className="flex items-center justify-center gap-1 text-[11px] font-medium text-gray-500">
-                          <Eye className="h-3.5 w-3.5 text-blue-600" /> Impressions
+                          <Eye className="h-3.5 w-3.5 text-amber-600" /> Impressions
                         </span>
                         <span className="text-base font-black text-gray-900">{views}</span>
                       </div>
@@ -180,13 +180,13 @@ export default async function MyAdvertisementsPage() {
         </div>
       ) : (
         <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-white p-12 text-center">
-          <Sparkles className="mx-auto h-12 w-12 text-blue-500" />
+          <Sparkles className="mx-auto h-12 w-12 text-amber-500" />
           <h3 className="mt-4 text-lg font-bold text-gray-900">No active campaigns yet</h3>
           <p className="mt-1 text-sm text-gray-500">
             Create an advertisement campaign to reach thousands of potential customers on the homepage.
           </p>
           <Link href="/dashboard/advertisements/create" className="mt-6 inline-block">
-            <Button className="bg-blue-600 hover:bg-blue-700 font-bold text-white">
+            <Button className="bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600 font-bold ">
               <PlusCircle className="mr-1.5 h-4 w-4" /> Create Your First Campaign
             </Button>
           </Link>

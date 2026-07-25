@@ -25,10 +25,8 @@ export default function RegisterPage() {
     <>
       <div className="mb-8 text-center">
         <Link href="/" className="inline-flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-            <span className="text-sm font-bold text-white">JN</span>
-          </div>
-          <span className="text-lg font-semibold text-gray-900">Jain Network</span>
+          <img src="/logo.jpg" alt="Arham Business Connect" className="h-10 w-auto" />
+          <span className="text-lg font-semibold text-gray-900">Arham Business Connect</span>
         </Link>
       </div>
 
@@ -72,7 +70,7 @@ export default function RegisterPage() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600"
               disabled={loading}
             >
               {loading ? 'Creating account...' : 'Create Account'}
@@ -81,7 +79,7 @@ export default function RegisterPage() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Already have an account?{' '}
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link href="/login" className="font-medium text-amber-600 hover:text-amber-500">
               Sign in
             </Link>
           </p>

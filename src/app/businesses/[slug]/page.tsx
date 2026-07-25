@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const business = await getBusinessBySlug(slug);
   if (!business) return { title: 'Business Not Found' };
   return {
-    title: `${business.business_name} — Jain Network`,
+    title: `${business.business_name} — Arham Business Connect`,
     description: business.description || `${business.business_name} in ${business.city}, ${business.state}`,
   };
 }
@@ -57,7 +57,7 @@ export default async function BusinessDetailPage({ params }: PageProps) {
             <CardContent className="p-8">
               {/* Header */}
               <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
                   <span className="text-2xl font-bold">
                     {business.business_name.charAt(0).toUpperCase()}
                   </span>
@@ -100,16 +100,16 @@ export default async function BusinessDetailPage({ params }: PageProps) {
                                 href={detail.value.startsWith('http') ? detail.value : `https://${detail.value}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
+                                className="text-amber-600 hover:underline"
                               >
                                 {detail.value}
                               </a>
                             ) : detail.label === 'Email' ? (
-                              <a href={`mailto:${detail.value}`} className="text-blue-600 hover:underline">
+                              <a href={`mailto:${detail.value}`} className="text-amber-600 hover:underline">
                                 {detail.value}
                               </a>
                             ) : detail.label === 'Phone' ? (
-                              <a href={`tel:${detail.value}`} className="text-blue-600 hover:underline">
+                              <a href={`tel:${detail.value}`} className="text-amber-600 hover:underline">
                                 {detail.value}
                               </a>
                             ) : (

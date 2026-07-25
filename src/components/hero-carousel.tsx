@@ -202,14 +202,14 @@ export function HeroCarousel() {
               {currentSlide.title}
             </h2>
 
-            <p className="max-w-xl text-base text-blue-100 sm:text-lg leading-relaxed">
+            <p className="max-w-xl text-base text-slate-200 sm:text-lg leading-relaxed">
               {currentSlide.subtitle}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
               <Link href={currentSlide.ctaLink}>
                 <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-base shadow-xl rounded-xl">
-                  {currentSlide.ctaText} <ArrowRight className="ml-2 h-5 w-5" />
+                  Join ABC <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
 
@@ -226,45 +226,6 @@ export function HeroCarousel() {
           </div>
         </div>
 
-        {/* Navigation Controls Row */}
-        <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-4">
-          {/* Navigation Dots */}
-          <div className="flex items-center gap-2">
-            {HERO_POSTERS.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => goToSlide(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  idx === currentIndex
-                    ? 'w-8 bg-amber-400 shadow-lg ring-2 ring-amber-300/40'
-                    : 'w-2.5 bg-white/30 hover:bg-white/60'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Left/Right Arrow Buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={goToPrev}
-              aria-label="Previous Slide"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-amber-400 hover:text-slate-950 hover:border-amber-400 shadow-md"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={goToNext}
-              aria-label="Next Slide"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-amber-400 hover:text-slate-950 hover:border-amber-400 shadow-md"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
       </div>
     </section>
   );

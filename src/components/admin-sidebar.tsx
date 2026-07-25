@@ -29,7 +29,7 @@ export function AdminSidebar() {
           href={link.href}
           className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             isActive(link.href)
-              ? 'bg-blue-50 text-blue-700'
+              ? 'bg-amber-50 text-amber-700'
               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
           }`}
         >

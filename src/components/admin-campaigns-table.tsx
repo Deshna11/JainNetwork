@@ -156,7 +156,7 @@ export function AdminCampaignsTable({ initialCampaigns }: AdminCampaignsTablePro
                   {/* Business & Owner */}
                   <td className="px-4 py-4 space-y-1">
                     <div className="flex items-center gap-1.5 font-bold text-gray-900">
-                      <Building className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                      <Building className="h-3.5 w-3.5 text-amber-600 shrink-0" />
                       <span>{camp.businesses?.business_name || camp.title}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-gray-500 text-[11px]">
@@ -174,7 +174,7 @@ export function AdminCampaignsTable({ initialCampaigns }: AdminCampaignsTablePro
                   {/* Plan & Amount */}
                   <td className="px-4 py-4">
                     <span className="font-bold text-gray-900 block">{camp.plan_name || 'Basic'}</span>
-                    <span className="text-sm font-black text-blue-600 block">₹{camp.amount || 999}</span>
+                    <span className="text-sm font-black text-amber-600 block">₹{camp.amount || 999}</span>
                     <span className="text-[10px] text-gray-400">{camp.duration_days || 30} Days</span>
                   </td>
 
@@ -196,7 +196,7 @@ export function AdminCampaignsTable({ initialCampaigns }: AdminCampaignsTablePro
                       <button
                         type="button"
                         onClick={() => setSelectedProofUrl(camp.payment_proof_url)}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 underline"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-800 underline"
                       >
                         <FileImage className="h-3.5 w-3.5" /> View Screenshot
                       </button>

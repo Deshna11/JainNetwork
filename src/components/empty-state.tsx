@@ -26,7 +26,7 @@ export function EmptyState({ title, description, actionLabel, actionHref }: Empt
       <p className="mt-2 max-w-sm text-sm text-gray-500">{description}</p>
       {actionLabel && actionHref && (
         <Link href={actionHref} className="mt-6">
-          <Button className="bg-blue-600 hover:bg-blue-700">{actionLabel}</Button>
+          <Button className="bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600">{actionLabel}</Button>
         </Link>
       )}
     </div>

@@ -147,7 +147,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                 disabled={s.id > step}
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
                   step === s.id
-                    ? 'bg-blue-600 text-white ring-4 ring-blue-100'
+                    ? 'bg-amber-500 text-slate-950 font-semibold ring-4 ring-amber-100'
                     : step > s.id
                     ? 'bg-emerald-600 text-white cursor-pointer'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
@@ -158,7 +158,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
               <span
                 className={`text-xs font-semibold ${
                   step === s.id
-                    ? 'text-blue-600 font-bold'
+                    ? 'text-amber-600 font-bold'
                     : step > s.id
                     ? 'text-gray-700'
                     : 'text-gray-400'
@@ -193,12 +193,12 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                   onClick={() => setSelectedPlan(plan)}
                   className={`relative flex cursor-pointer flex-col justify-between rounded-2xl border-2 p-6 shadow-md transition-all ${
                     isSelected
-                      ? 'border-blue-600 bg-blue-50/40 ring-4 ring-blue-100'
+                      ? 'border-amber-600 bg-amber-50/40 ring-4 ring-amber-100'
                       : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-lg'
                   }`}
                 >
                   {plan.badge && (
-                    <span className="absolute right-4 top-4 rounded-full bg-blue-600 px-3 py-0.5 text-xs font-bold text-white shadow-sm">
+                    <span className="absolute right-4 top-4 rounded-full bg-amber-500 text-slate-950 font-semibold px-3 py-0.5 text-xs font-bold  shadow-sm">
                       {plan.badge}
                     </span>
                   )}
@@ -226,7 +226,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                       setStep(2);
                     }}
                     className={`mt-6 w-full font-bold ${
-                      isSelected ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-900 hover:bg-gray-800 text-white'
+                      isSelected ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold' : 'bg-gray-900 hover:bg-gray-800 '
                     }`}
                   >
                     Select {plan.name}
@@ -259,7 +259,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                   onClick={() => setSelectedTemplateId(tmpl.id)}
                   className={`cursor-pointer rounded-2xl border-2 p-5 shadow-sm transition-all ${
                     isSelected
-                      ? 'border-blue-600 bg-blue-50/50 ring-4 ring-blue-100'
+                      ? 'border-amber-600 bg-amber-50/50 ring-4 ring-amber-100'
                       : 'border-gray-200 bg-white hover:border-blue-300'
                   }`}
                 >
@@ -269,7 +269,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                       <p className="text-xs text-gray-500">{tmpl.description}</p>
                     </div>
                     {isSelected && (
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-slate-950 font-semibold">
                         <Check className="h-4 w-4" />
                       </span>
                     )}
@@ -285,7 +285,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
             <Button variant="outline" onClick={() => setStep(1)}>
               <ChevronLeft className="mr-1 h-4 w-4" /> Back to Plans
             </Button>
-            <Button onClick={() => setStep(3)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
+            <Button onClick={() => setStep(3)} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold font-bold">
               Next: Fill Details <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
@@ -452,7 +452,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                 }
                 setStep(4);
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold font-bold"
             >
               Next: Live Preview & Summary <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
@@ -506,7 +506,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                 </div>
                 <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
                   <span className="text-base font-bold text-gray-900">Total Amount:</span>
-                  <span className="text-3xl font-black text-blue-600">₹{selectedPlan.price}</span>
+                  <span className="text-3xl font-black text-amber-600">₹{selectedPlan.price}</span>
                 </div>
               </div>
             </div>
@@ -527,7 +527,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
             <Button variant="outline" onClick={() => setStep(3)}>
               <ChevronLeft className="mr-1 h-4 w-4" /> Edit Details
             </Button>
-            <Button onClick={() => setStep(5)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-base px-6">
+            <Button onClick={() => setStep(5)} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold font-bold text-base px-6">
               Proceed to Payment (₹{selectedPlan.price}) <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
@@ -542,7 +542,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
           <div className="text-center">
             <h2 className="text-2xl font-extrabold text-gray-900">Manual Payment Verification</h2>
             <p className="mt-1 text-sm text-gray-500">
-              Transfer total amount <strong className="text-blue-600">₹{selectedPlan.price}</strong> via UPI or Bank Transfer and upload transaction proof.
+              Transfer total amount <strong className="text-amber-600">₹{selectedPlan.price}</strong> via UPI or Bank Transfer and upload transaction proof.
             </p>
           </div>
 
@@ -559,12 +559,12 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                 </div>
                 
                 {/* Copyable UPI ID */}
-                <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2 text-sm font-bold text-blue-900 border border-blue-200">
+                <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-slate-900 border border-amber-200">
                   <span>UPI ID: {BANK_DETAILS.upiId}</span>
                   <button
                     type="button"
                     onClick={handleCopyUpi}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600 transition-colors"
                     title="Copy UPI ID"
                   >
                     {copiedUpi ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
@@ -575,7 +575,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
               {/* Exact Bank Details Card */}
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-3">
                 <h4 className="flex items-center gap-2 text-sm font-bold text-gray-900 border-b border-gray-100 pb-2">
-                  <Building2 className="h-4 w-4 text-blue-600" /> Bank Transfer Details (NEFT / RTGS / IMPS)
+                  <Building2 className="h-4 w-4 text-amber-600" /> Bank Transfer Details (NEFT / RTGS / IMPS)
                 </h4>
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between py-1 border-b border-gray-50">
@@ -592,7 +592,7 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
                   </div>
                   <div className="flex justify-between py-1 border-b border-gray-50">
                     <span className="text-gray-500">IFSC Code:</span>
-                    <span className="font-mono font-bold text-blue-600">{BANK_DETAILS.ifsc}</span>
+                    <span className="font-mono font-bold text-amber-600">{BANK_DETAILS.ifsc}</span>
                   </div>
                   <div className="flex justify-between py-1">
                     <span className="text-gray-500">Current Account No:</span>
@@ -663,10 +663,10 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
               </div>
 
               {/* Summary Box */}
-              <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 space-y-2 text-xs text-blue-950">
+              <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4 space-y-2 text-xs text-slate-950">
                 <div className="flex justify-between font-semibold">
                   <span>Plan: {selectedPlan.name}</span>
-                  <span className="text-blue-700 font-bold">₹{selectedPlan.price}</span>
+                  <span className="text-amber-700 font-bold">₹{selectedPlan.price}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>Status after payment:</span>

@@ -2,7 +2,7 @@ import { getProfile } from '@/actions/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata = {
-  title: 'Profile — Jain Network',
+  title: 'Profile — Arham Business Connect',
 };
 
 export default async function ProfilePage() {
