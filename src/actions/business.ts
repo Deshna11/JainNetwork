@@ -55,7 +55,7 @@ export async function getMyBusiness() {
 }
 
 // Create a new business
-export async function createBusiness(formData: BusinessFormData) {
+export async function createBusiness(formData: FormData) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -72,8 +72,35 @@ export async function createBusiness(formData: BusinessFormData) {
       return { error: 'You already have a registered business.' };
     }
 
+    const business_name = formData.get('business_name') as string;
+    const city = formData.get('city') as string;
+
+    // Handle Payment Proof Upload
+    const paymentProofFile = formData.get('payment_proof') as File | null;
+    let payment_proof_url = null;
+
+    if (paymentProofFile && paymentProofFile.size > 0) {
+      const fileExt = paymentProofFile.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('payments')
+        .upload(fileName, paymentProofFile);
+
+      if (uploadError) {
+        return { error: 'Failed to upload payment proof. Please try again.' };
+      }
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('payments')
+        .getPublicUrl(fileName);
+        
+      payment_proof_url = publicUrlData.publicUrl;
+    }
+
     // Generate unique slug
-    let slug = generateSlug(formData.business_name, formData.city);
+    let slug = generateSlug(business_name, city);
     
     // Check for slug collision and append suffix if needed
     const { data: slugCheck } = await supabase
@@ -88,18 +115,19 @@ export async function createBusiness(formData: BusinessFormData) {
 
     const { error } = await supabase.from('businesses').insert({
       owner_id: user.id,
-      category_id: formData.category_id,
+      category_id: formData.get('category_id') as string,
       slug,
-      business_name: formData.business_name,
-      owner_name: formData.owner_name,
-      phone: formData.phone,
-      email: formData.email,
-      website: formData.website || null,
-      description: formData.description || null,
-      address: formData.address,
-      city: formData.city,
-      state: formData.state,
-      gst_number: formData.gst_number || null,
+      business_name,
+      owner_name: formData.get('owner_name') as string,
+      phone: formData.get('phone') as string,
+      email: formData.get('email') as string,
+      website: (formData.get('website') as string) || null,
+      description: (formData.get('description') as string) || null,
+      address: formData.get('address') as string,
+      city,
+      state: formData.get('state') as string,
+      gst_number: (formData.get('gst_number') as string) || null,
+      payment_proof_url,
       status: 'approved',
     });
 

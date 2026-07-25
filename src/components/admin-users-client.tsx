@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { adminDeleteUser } from '@/actions/admin';
+import { adminDeleteUser, updateUserRegistrationStatus } from '@/actions/admin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -41,6 +41,18 @@ export function AdminUsersClient({ initialUsers, searchAction }: Props) {
     setLoadingId(null);
   }
 
+  async function handleUpdateStatus(id: string, status: 'approved' | 'rejected') {
+    setLoadingId(id);
+    const result = await updateUserRegistrationStatus(id, status);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(`User registration ${status}.`);
+      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, registration_status: status } : u));
+    }
+    setLoadingId(null);
+  }
+
   return (
     <div>
       <form onSubmit={handleSearch} className="mb-6 flex gap-2">
@@ -60,8 +72,9 @@ export function AdminUsersClient({ initialUsers, searchAction }: Props) {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Registration</TableHead>
               <TableHead className="hidden sm:table-cell">Joined</TableHead>
-              <TableHead className="w-24">Action</TableHead>
+              <TableHead className="w-40 text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -81,10 +94,29 @@ export function AdminUsersClient({ initialUsers, searchAction }: Props) {
                       {user.role}
                     </Badge>
                   </TableCell>
+                  <TableCell>
+                    <Badge variant={
+                      user.registration_status === 'approved' ? 'default' :
+                      user.registration_status === 'rejected' ? 'destructive' : 'outline'
+                    }>
+                      {user.registration_status}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="hidden sm:table-cell text-sm text-gray-500">
                     {formatDate(user.created_at)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-right flex items-center justify-end gap-2">
+                    {user.role !== 'admin' && user.registration_status === 'pending' && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => handleUpdateStatus(user.id, 'approved')}
+                        disabled={loadingId === user.id}
+                      >
+                        Approve
+                      </Button>
+                    )}
                     {user.role !== 'admin' && (
                       <Button
                         size="sm"

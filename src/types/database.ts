@@ -3,6 +3,7 @@
 // ============================================
 
 export type UserRole = 'user' | 'admin';
+export type RegistrationStatus = 'pending' | 'approved' | 'rejected';
 export type BusinessStatus = 'pending' | 'approved' | 'rejected';
 export type AdStatus = 'pending' | 'approved' | 'rejected';
 
@@ -11,6 +12,7 @@ export interface Profile {
   name: string;
   email: string;
   role: UserRole;
+  registration_status: RegistrationStatus;
   created_at: string;
 }
 
@@ -38,6 +40,7 @@ export interface Business {
   state: string;
   gst_number: string | null;
   status: BusinessStatus;
+  payment_proof_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -76,6 +79,7 @@ export interface BusinessFormData {
   city: string;
   state: string;
   gst_number?: string;
+  payment_proof_url?: string;
 }
 
 export interface AdvertisementFormData {

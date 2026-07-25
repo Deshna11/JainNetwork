@@ -5,6 +5,9 @@ export const metadata = {
   title: 'Manage Users — Admin',
 };
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function AdminUsersPage() {
   const users = await getAllUsers();
 

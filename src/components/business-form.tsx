@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { INDIAN_STATES } from '@/lib/constants';
+import { BANK_DETAILS } from '@/lib/ad-plans';
 import type { Category } from '@/types/database';
 
 interface BusinessFormProps {
@@ -25,19 +26,7 @@ export function BusinessRegisterForm({ categories }: BusinessFormProps) {
     setLoading(true);
 
     const form = new FormData(e.currentTarget);
-    const result = await createBusiness({
-      business_name: form.get('business_name') as string,
-      owner_name: form.get('owner_name') as string,
-      category_id: form.get('category_id') as string,
-      phone: form.get('phone') as string,
-      email: form.get('email') as string,
-      website: form.get('website') as string,
-      description: form.get('description') as string,
-      address: form.get('address') as string,
-      city: form.get('city') as string,
-      state: form.get('state') as string,
-      gst_number: form.get('gst_number') as string,
-    });
+    const result = await createBusiness(form);
 
     if (result.error) {
       toast.error(result.error);
@@ -132,6 +121,43 @@ export function BusinessRegisterForm({ categories }: BusinessFormProps) {
           <div className="space-y-2">
             <Label htmlFor="gst_number">GST Number (optional)</Label>
             <Input id="gst_number" name="gst_number" />
+          </div>
+
+          <hr className="my-8" />
+
+          <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Registration Payment</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              To complete your business registration, a one-time fee of <strong className="text-gray-900 font-bold">₹499 INR</strong> is required.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-8 items-start">
+              {/* Payment Instructions / QR */}
+              <div className="w-full sm:w-1/2 flex flex-col items-center justify-center p-6 bg-white rounded-lg border border-gray-200 text-center shadow-sm">
+                <div className="w-48 h-48 mb-4 overflow-hidden rounded-xl border border-gray-100 shadow-sm bg-white p-2">
+                  <img src={BANK_DETAILS.qrImageUrl} alt="Payment QR Code" className="h-full w-full object-contain" />
+                </div>
+                <p className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+                  UPI ID: {BANK_DETAILS.upiId}
+                </p>
+              </div>
+
+              {/* Upload Proof */}
+              <div className="w-full sm:w-1/2 space-y-4 pt-4 sm:pt-0">
+                <div className="space-y-2">
+                  <Label htmlFor="payment_proof" className="text-base font-semibold">Upload Payment Screenshot *</Label>
+                  <p className="text-sm text-gray-500 mb-2">After making the payment, please upload the screenshot or receipt here.</p>
+                  <Input 
+                    id="payment_proof" 
+                    name="payment_proof" 
+                    type="file" 
+                    accept="image/*"
+                    required
+                    className="cursor-pointer file:cursor-pointer file:bg-amber-100 file:text-amber-900 file:border-0 file:rounded file:px-3 file:py-1 file:mr-4 file:hover:bg-amber-200"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           <Button

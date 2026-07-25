@@ -58,10 +58,30 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="text-center py-6">
-              <p className="text-gray-500">You haven&apos;t registered a business yet.</p>
-              <Link href="/dashboard/business/register" className="mt-4 inline-block">
-                <Button className="bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600">Register Business</Button>
-              </Link>
+              {profile?.registration_status === 'approved' ? (
+                <>
+                  <p className="text-gray-500">You haven&apos;t registered a business yet.</p>
+                  <Link href="/dashboard/business/register" className="mt-4 inline-block">
+                    <Button className="bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600">Register Business</Button>
+                  </Link>
+                </>
+              ) : profile?.registration_status === 'rejected' ? (
+                <>
+                  <p className="text-red-500 font-medium">Your registration request was rejected by an admin.</p>
+                  <p className="mt-2 text-sm text-gray-500">Please contact support for more information.</p>
+                </>
+              ) : (
+                <>
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 mb-4">
+                    <span className="text-2xl">⏳</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">Registration Pending</h3>
+                  <p className="text-gray-500 mt-2 max-w-md mx-auto">
+                    Your account is currently waiting for admin approval before you can register a business. 
+                    Please check back later or contact support.
+                  </p>
+                </>
+              )}
             </div>
           )}
         </CardContent>
@@ -95,17 +115,19 @@ export default async function DashboardPage() {
             </Link>
           </>
         ) : (
-          <Link href="/dashboard/business/register">
-            <Card className="h-full transition-all hover:shadow-md hover:border-amber-200 cursor-pointer">
-              <CardContent className="flex items-center gap-3 p-5">
-                <span className="text-2xl">🏢</span>
-                <div>
-                  <p className="font-medium text-gray-900">Register Business</p>
-                  <p className="text-xs text-gray-500">Get listed on the directory</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+          profile?.registration_status === 'approved' ? (
+            <Link href="/dashboard/business/register">
+              <Card className="h-full transition-all hover:shadow-md hover:border-amber-200 cursor-pointer">
+                <CardContent className="flex items-center gap-3 p-5">
+                  <span className="text-2xl">🏢</span>
+                  <div>
+                    <p className="font-medium text-gray-900">Register Business</p>
+                    <p className="text-xs text-gray-500">Get listed on the directory</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ) : null
         )}
         <Link href="/dashboard/search">
           <Card className="h-full transition-all hover:shadow-md hover:border-amber-200 cursor-pointer">

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getMyBusiness, getCategories } from '@/actions/business';
+import { getProfile } from '@/actions/auth';
 import { BusinessRegisterForm } from '@/components/business-form';
 
 export const metadata = {
@@ -7,7 +8,15 @@ export const metadata = {
 };
 
 export default async function RegisterBusinessPage() {
-  const [business, categories] = await Promise.all([getMyBusiness(), getCategories()]);
+  const [business, categories, profile] = await Promise.all([
+    getMyBusiness(),
+    getCategories(),
+    getProfile()
+  ]);
+
+  if (profile?.registration_status !== 'approved') {
+    redirect('/dashboard');
+  }
 
   // If user already has a business, redirect to edit
   if (business) {

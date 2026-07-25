@@ -140,6 +140,37 @@ export async function getAllUsers(search?: string) {
   return data || [];
 }
 
+// Get pending users (admin)
+export async function getPendingUsers() {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('registration_status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  return data || [];
+}
+
+// Update user registration status (admin)
+export async function updateUserRegistrationStatus(id: string, status: 'approved' | 'rejected') {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ registration_status: status })
+    .eq('id', id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath('/admin/users');
+  revalidatePath('/admin');
+  revalidatePath('/dashboard');
+  return { success: true };
+}
+
 // Delete a user (admin) — deletes from auth.users which cascades to profiles
 export async function adminDeleteUser(id: string) {
   const supabase = await createClient();

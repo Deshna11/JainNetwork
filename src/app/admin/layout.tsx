@@ -1,4 +1,5 @@
 import { Navbar } from '@/components/navbar';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Admin Panel — Arham Business Connect',

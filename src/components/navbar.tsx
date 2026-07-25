@@ -19,7 +19,7 @@ export function Navbar() {
 
   useEffect(() => {
     const supabase = createClient();
-    
+
     async function getProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -37,17 +37,24 @@ export function Navbar() {
   }, []);
 
   const navLinks = profile
-    ? [
-        { href: '/dashboard', label: 'Dashboard' },
-        { href: '/dashboard/business', label: 'My Business' },
-        { href: '/dashboard/search', label: 'Search Businesses' },
-        { href: '/dashboard/advertisements', label: 'My Advertisements' },
-      ]
+    ? profile.role === 'admin'
+      ? [
+          { href: '/admin', label: 'Overview' },
+          { href: '/admin/users', label: 'Users' },
+          { href: '/admin/businesses', label: 'Businesses' },
+          { href: '/admin/advertisements', label: 'Advertisements' },
+        ]
+      : [
+          { href: '/dashboard', label: 'Dashboard' },
+          { href: '/dashboard/business', label: 'My Business' },
+          { href: '/dashboard/search', label: 'Search Businesses' },
+          { href: '/dashboard/advertisements', label: 'My Advertisements' },
+        ]
     : [];
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
-    if (href === '/dashboard') return pathname === '/dashboard';
+    if (href === '/dashboard' || href === '/admin') return pathname === href;
     return pathname === href || pathname.startsWith(href + '/');
   };
 
@@ -66,11 +73,10 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                isActive(link.href)
+              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive(link.href)
                   ? 'text-amber-600'
                   : 'text-gray-600 hover:text-gray-900'
-              }`}
+                }`}
             >
               {link.label}
             </Link>
@@ -94,11 +100,6 @@ export function Navbar() {
                 <DropdownMenuItem className="cursor-pointer">
                   <Link href="/dashboard/profile" className="w-full">Profile</Link>
                 </DropdownMenuItem>
-                {profile.role === 'admin' && (
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Link href="/admin" className="w-full">Admin Panel</Link>
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer text-red-600">
                   <form action={logout} className="w-full">
@@ -128,9 +129,9 @@ export function Navbar() {
         {/* Mobile Menu */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </SheetTrigger>
           <SheetContent side="right" className="w-72">
             <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
@@ -140,11 +141,10 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive(link.href)
+                  className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive(link.href)
                       ? 'bg-amber-50 text-amber-600'
                       : 'text-gray-600 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -159,15 +159,6 @@ export function Navbar() {
                   >
                     Profile
                   </Link>
-                  {profile.role === 'admin' && (
-                    <Link
-                      href="/admin"
-                      onClick={() => setMobileOpen(false)}
-                      className="rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-                    >
-                      Admin Panel
-                    </Link>
-                  )}
                   <form action={logout}>
                     <button
                       type="submit"
