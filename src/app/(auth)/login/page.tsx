@@ -23,11 +23,13 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="mb-8 text-center">
-        <Link href="/" className="inline-flex items-center gap-2">
-          <img src="/logo.jpg" alt="Arham Business Connect" className="h-10 w-auto" />
-          <span className="text-lg font-semibold text-gray-900">Arham Business Connect</span>
-        </Link>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex justify-center">
+          <img src="/logo.jpg" alt="Arham Business Connect" fetchPriority="high" decoding="async" className="h-10 w-auto" />
+        </div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Sign in to your account
+        </h2>
       </div>
 
       <Card>

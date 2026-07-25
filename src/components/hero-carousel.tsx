@@ -155,6 +155,8 @@ export function HeroCarousel() {
         <img
           src={currentSlide.image}
           alt=""
+          fetchPriority="high"
+          decoding="async"
           className="h-full w-full object-cover blur-3xl scale-125 transition-all duration-1000"
         />
       </div>
@@ -183,6 +185,9 @@ export function HeroCarousel() {
                     key={slide.id}
                     src={slide.image}
                     alt={slide.title}
+                    fetchPriority={idx === 0 ? "high" : "auto"}
+                    loading={idx === 0 ? "eager" : "lazy"}
+                    decoding="async"
                     className={`absolute inset-0 h-full w-full object-contain bg-slate-950 transition-opacity duration-700 ease-in-out ${
                       idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
                     }`}

@@ -115,8 +115,8 @@ export function RenderAdTemplate({
             )}
           </div>
           <div className="mt-4 flex gap-4">
-            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 shadow-sm">
-              <img src={logoSrc} alt={title} className="h-full w-full object-cover" />
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 shadow-sm">
+              <img src={logoSrc} alt={title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-amber-600">{businessName}</p>
@@ -149,7 +149,7 @@ export function RenderAdTemplate({
           </div>
           <div className="mt-4 flex items-start gap-4">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 border-blue-400/40 bg-black/20 shadow-md">
-              <img src={logoSrc} alt={title} className="h-full w-full object-cover" />
+              <img src={logoSrc} alt={title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
             </div>
             <div className="flex-1">
               <span className="text-xs uppercase tracking-widest text-slate-400 font-semibold">{businessName}</span>
@@ -181,7 +181,7 @@ export function RenderAdTemplate({
           </div>
           <div className="mt-4 flex gap-4">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-white/40 bg-white/10">
-              <img src={logoSrc} alt={title} className="h-full w-full object-cover" />
+              <img src={logoSrc} alt={title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-black leading-tight text-white">{title}</h3>
@@ -211,7 +211,7 @@ export function RenderAdTemplate({
           </div>
           <div className="mt-3 flex gap-4 items-center">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-amber-400 bg-white p-0.5 shadow">
-              <img src={logoSrc} alt={title} className="h-full w-full rounded-full object-cover" />
+              <img src={logoSrc} alt={title} loading="lazy" decoding="async" className="h-full w-full rounded-full object-cover" />
             </div>
             <div>
               <p className="text-xs font-bold text-amber-700">{businessName}</p>
@@ -242,7 +242,7 @@ export function RenderAdTemplate({
           </div>
           <div className="mt-4 flex gap-4">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-amber-400/40 bg-slate-900">
-              <img src={logoSrc} alt={title} className="h-full w-full object-cover" />
+              <img src={logoSrc} alt={title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
             </div>
             <div className="flex-1">
               <span className="text-[11px] uppercase tracking-wider text-slate-400 font-medium">{businessName}</span>
@@ -273,7 +273,7 @@ export function RenderAdTemplate({
           </div>
           <div className="mt-4 flex gap-4">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 border-white/40 bg-white/10">
-              <img src={logoSrc} alt={title} className="h-full w-full object-cover" />
+              <img src={logoSrc} alt={title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-black text-white">{title}</h3>
@@ -303,7 +303,7 @@ export function RenderAdTemplate({
           </div>
           <div className="mt-4 flex gap-4">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-emerald-400/40 bg-emerald-950">
-              <img src={logoSrc} alt={title} className="h-full w-full object-cover" />
+              <img src={logoSrc} alt={title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
             </div>
             <div className="flex-1">
               <span className="text-xs font-medium text-emerald-300">{businessName}</span>
@@ -334,7 +334,7 @@ export function RenderAdTemplate({
           </div>
           <div className="mt-4 flex gap-4">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-blue-700 bg-slate-900">
-              <img src={logoSrc} alt={title} className="h-full w-full object-cover" />
+              <img src={logoSrc} alt={title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
             </div>
             <div className="flex-1">
               <p className="text-xs font-medium text-slate-400">{businessName}</p>

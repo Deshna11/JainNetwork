@@ -44,7 +44,7 @@ async function BusinessResults({
       <p className="mb-6 text-sm text-gray-500">
         Showing {businesses.length} of {total} business{total !== 1 ? 'es' : ''}
       </p>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {businesses.map((business) => (
           <BusinessCard key={business.id} business={business} />
         ))}
@@ -102,7 +102,7 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
             </p>
           </div>
 
-          <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6">
+          <div className="sticky top-[72px] z-40 mb-8 rounded-xl border border-gray-200 bg-white/95 backdrop-blur-md p-5 shadow-sm">
             <Suspense fallback={null}>
               <SearchBar categories={categories} cities={cities} />
             </Suspense>
@@ -110,9 +110,9 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
 
           <Suspense
             fallback={
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-48 animate-pulse rounded-xl border border-gray-200 bg-gray-50" />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="h-40 animate-pulse rounded-xl border border-gray-200 bg-gray-50" />
                 ))}
               </div>
             }

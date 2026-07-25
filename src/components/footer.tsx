@@ -10,7 +10,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center gap-2">
-              <img src="/logo.jpg" alt="Arham Business Connect" className="h-10 w-auto" />
+              <img src="/logo.jpg" alt="Arham Business Connect" loading="lazy" decoding="async" className="h-10 w-auto" />
               <span className="text-lg font-semibold text-gray-900">Arham Business Connect</span>
             </Link>
             <p className="mt-3 text-sm text-gray-500">

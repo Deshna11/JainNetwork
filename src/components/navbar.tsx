@@ -4,8 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { logout } from '@/actions/auth';
 import type { Profile } from '@/types/database';
 
 export function Navbar() {
@@ -33,20 +36,27 @@ export function Navbar() {
     getProfile();
   }, []);
 
-  const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/businesses', label: 'Businesses' },
-  ];
+  const navLinks = profile
+    ? [
+        { href: '/dashboard', label: 'Dashboard' },
+        { href: '/dashboard/business', label: 'My Business' },
+        { href: '/dashboard/search', label: 'Search Businesses' },
+        { href: '/dashboard/advertisements', label: 'My Advertisements' },
+      ]
+    : [];
 
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href);
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/';
+    if (href === '/dashboard') return pathname === '/dashboard';
+    return pathname === href || pathname.startsWith(href + '/');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.jpg" alt="Arham Business Connect" className="h-10 w-auto" />
+          <img src="/logo.jpg" alt="Arham Business Connect" fetchPriority="high" decoding="async" className="h-10 w-auto" />
           <span className="text-lg font-semibold text-gray-900 hidden sm:inline-block">Arham Business Connect</span>
         </Link>
 
@@ -72,20 +82,33 @@ export function Navbar() {
           {loading ? (
             <div className="h-9 w-20 animate-pulse rounded-md bg-gray-100" />
           ) : profile ? (
-            <>
-              {profile.role === 'admin' && (
-                <Link href="/admin">
-                  <Button variant="ghost" size="sm">
-                    Admin
-                  </Button>
-                </Link>
-              )}
-              <Link href="/dashboard">
-                <Button variant="ghost" size="sm">
-                  Dashboard
-                </Button>
-              </Link>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-colors">
+                <User className="h-5 w-5 text-gray-700" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <div className="px-2 py-1.5 text-sm font-semibold text-gray-900">
+                  My Account
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer">
+                  <Link href="/dashboard/profile" className="w-full">Profile</Link>
+                </DropdownMenuItem>
+                {profile.role === 'admin' && (
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Link href="/admin" className="w-full">Admin Panel</Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer text-red-600">
+                  <form action={logout} className="w-full">
+                    <button type="submit" className="w-full text-left">
+                      Logout
+                    </button>
+                  </form>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <>
               <Link href="/login">
@@ -129,6 +152,13 @@ export function Navbar() {
               <div className="my-2 border-t" />
               {profile ? (
                 <>
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                  >
+                    Profile
+                  </Link>
                   {profile.role === 'admin' && (
                     <Link
                       href="/admin"
@@ -138,13 +168,15 @@ export function Navbar() {
                       Admin Panel
                     </Link>
                   )}
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-                  >
-                    Dashboard
-                  </Link>
+                  <form action={logout}>
+                    <button
+                      type="submit"
+                      onClick={() => setMobileOpen(false)}
+                      className="w-full text-left rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </form>
                 </>
               ) : (
                 <>

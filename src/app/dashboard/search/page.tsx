@@ -31,7 +31,7 @@ export default async function DashboardSearchPage({ searchParams }: PageProps) {
       <h1 className="text-2xl font-bold text-gray-900">Search Businesses</h1>
       <p className="mt-1 text-gray-500">Find businesses in the Jain community.</p>
 
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+      <div className="sticky top-[72px] z-40 mt-6 rounded-xl border border-gray-200 bg-white/95 backdrop-blur-md p-5 shadow-sm">
         <Suspense fallback={null}>
           <SearchBar categories={categories} cities={cities} basePath="/dashboard/search" />
         </Suspense>
@@ -43,7 +43,7 @@ export default async function DashboardSearchPage({ searchParams }: PageProps) {
             <p className="mb-4 text-sm text-gray-500">
               Showing {businesses.length} of {total} result{total !== 1 ? 's' : ''}
             </p>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {businesses.map((business) => (
                 <BusinessCard key={business.id} business={business} />
               ))}
