@@ -26,6 +26,7 @@ import {
   ShoppingBag,
   Briefcase,
   Coins,
+  ShieldCheck,
 } from 'lucide-react';
 
 const POPULAR_CATEGORIES = [
@@ -226,6 +227,70 @@ export default async function HomePage() {
                   <p className="mt-2 text-sm text-gray-500">{item.description}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ⭐ The Vision Behind Arham Business Connect */}
+        <section className="bg-white py-16 sm:py-24 border-t border-gray-100">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {/* Section Header */}
+            <div className="text-center max-w-3xl mx-auto">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3.5 py-1 text-xs font-bold text-amber-900 mb-3">
+                <Sparkles className="h-3.5 w-3.5 text-amber-600" /> Leadership & Vision
+              </span>
+              <h2 className="text-2xl font-black text-gray-900 sm:text-4xl tracking-tight">
+                The Vision Behind Arham Business Connect
+              </h2>
+              <p className="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed font-medium">
+                Meet the person dedicated to building meaningful connections within the Jain business community.
+              </p>
+            </div>
+
+            {/* Two-Column Card Layout */}
+            <div className="mt-12 mx-auto max-w-4xl rounded-3xl border border-gray-200/80 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-8 sm:p-12 shadow-2xl text-white">
+              <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-center md:justify-between gap-8 md:gap-12">
+                {/* Left Side: Circular Portrait with Metallic Gold Border */}
+                <div className="shrink-0">
+                  <div className="relative inline-block">
+                    <div className="h-48 w-48 sm:h-52 sm:w-52 rounded-full p-[3px] bg-gradient-to-tr from-[#B8860B] via-[#D4AF37] to-[#F3E5AB] shadow-xl shadow-amber-950/20">
+                      <img
+                        src="/darshan-oswal.jpg"
+                        alt="Darshan Bharatji Oswal"
+                        className="h-full w-full rounded-full object-cover object-[center_15%] shadow-inner"
+                      />
+                    </div>
+                    {/* Premium Metallic Gold Verified Badge */}
+                    <div
+                      className="absolute bottom-1.5 right-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-[#B8860B] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-bold shadow-md border-2 border-slate-950"
+                      title="Founder & AI Engineer"
+                    >
+                      <ShieldCheck className="h-4 w-4 text-slate-950" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side: Details & Quote */}
+                <div className="flex-1 space-y-4">
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-widest text-[#D4AF37]">
+                      Founder & Lead Architect
+                    </span>
+                    <h3 className="mt-1 text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      Darshan Bharatji Oswal
+                    </h3>
+                    <p className="mt-1 text-xs sm:text-sm font-bold text-slate-300">
+                      B.Tech CSE | AI Engineer
+                    </p>
+                  </div>
+
+                  <div className="my-4 border-t border-slate-800" />
+
+                  <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-normal">
+                    &ldquo;The face of Arham Business Connect, inspiring entrepreneurs to connect, collaborate, and create opportunities.&rdquo;
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
