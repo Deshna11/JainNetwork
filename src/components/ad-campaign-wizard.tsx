@@ -118,7 +118,12 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
 
     const MAX_BYTES = 5 * 1024 * 1024;
     if (file.size > MAX_BYTES) {
-      toast.error(`File size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 5MB limit.`);
+      toast.error(
+        `Upload failed: File size (${(file.size / (1024 * 1024)).toFixed(
+          2
+        )} MB) exceeds the 5MB limit. Please select an image smaller than 5MB.`
+      );
+      e.target.value = '';
       return;
     }
 
@@ -173,7 +178,12 @@ export function AdCampaignWizard({ categories, userBusinesses }: AdCampaignWizar
 
     const MAX_BYTES = 5 * 1024 * 1024;
     if (file.size > MAX_BYTES) {
-      toast.error(`File size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 5MB limit.`);
+      toast.error(
+        `Upload failed: File size (${(file.size / (1024 * 1024)).toFixed(
+          2
+        )} MB) exceeds the 5MB limit. Please select an image smaller than 5MB.`
+      );
+      e.target.value = '';
       return;
     }
 

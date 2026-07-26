@@ -21,20 +21,41 @@ export function BusinessRegisterForm({ categories }: BusinessFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB limit
+    if (file.size > MAX_SIZE_BYTES) {
+      toast.error(
+        `Upload failed: File size (${(file.size / (1024 * 1024)).toFixed(
+          2
+        )} MB) exceeds the 5MB limit. Please select an image smaller than 5MB.`
+      );
+      e.target.value = ''; // Reset input
+      return;
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
 
-    const form = new FormData(e.currentTarget);
-    const result = await createBusiness(form);
+    try {
+      const form = new FormData(e.currentTarget);
+      const result = await createBusiness(form);
 
-    if (result.error) {
-      toast.error(result.error);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success('Business registered! Waiting for admin approval.');
+        router.push('/dashboard');
+        router.refresh();
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Registration failed. Please check network and try again.');
+    } finally {
       setLoading(false);
-    } else {
-      toast.success('Business registered! Waiting for admin approval.');
-      router.push('/dashboard');
-      router.refresh();
     }
   }
 
@@ -145,14 +166,19 @@ export function BusinessRegisterForm({ categories }: BusinessFormProps) {
               {/* Upload Proof */}
               <div className="w-full sm:w-1/2 space-y-4 pt-4 sm:pt-0">
                 <div className="space-y-2">
-                  <Label htmlFor="payment_proof" className="text-base font-semibold">Upload Payment Screenshot *</Label>
-                  <p className="text-sm text-gray-500 mb-2">After making the payment, please upload the screenshot or receipt here.</p>
+                  <Label htmlFor="payment_proof" className="text-base font-semibold">
+                    Upload Payment Screenshot * <span className="text-xs text-amber-800 font-normal">(Max 5MB)</span>
+                  </Label>
+                  <p className="text-sm text-gray-500 mb-2">
+                    After making the payment, please upload the screenshot or receipt here (Max size: 5MB).
+                  </p>
                   <Input 
                     id="payment_proof" 
                     name="payment_proof" 
                     type="file" 
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp,image/jpg"
                     required
+                    onChange={handleFileChange}
                     className="cursor-pointer file:cursor-pointer file:bg-amber-100 file:text-amber-900 file:border-0 file:rounded file:px-3 file:py-1 file:mr-4 file:hover:bg-amber-200"
                   />
                 </div>

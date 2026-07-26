@@ -75,27 +75,40 @@ export async function createBusiness(formData: FormData) {
     const business_name = formData.get('business_name') as string;
     const city = formData.get('city') as string;
 
-    // Handle Payment Proof Upload
+    // Handle Payment Proof Upload (Max 5MB)
     const paymentProofFile = formData.get('payment_proof') as File | null;
     let payment_proof_url = null;
 
     if (paymentProofFile && paymentProofFile.size > 0) {
-      const fileExt = paymentProofFile.name.split('.').pop();
+      const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB limit
+      if (paymentProofFile.size > MAX_SIZE_BYTES) {
+        return {
+          error: `Upload failed: File size (${(paymentProofFile.size / (1024 * 1024)).toFixed(2)} MB) exceeds the 5MB limit. Please upload an image smaller than 5MB.`,
+        };
+      }
+
+      const fileExt = paymentProofFile.name.split('.').pop() || 'jpg';
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      
+      const arrayBuffer = await paymentProofFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('payments')
-        .upload(fileName, paymentProofFile);
+        .upload(fileName, buffer, {
+          contentType: paymentProofFile.type || 'image/jpeg',
+          upsert: true,
+        });
 
       if (uploadError) {
-        return { error: 'Failed to upload payment proof. Please try again.' };
+        console.error('Payment proof upload error:', uploadError);
+        return { error: `Failed to upload payment proof: ${uploadError.message}` };
       }
 
       // Get public URL
       const { data: publicUrlData } = supabase.storage
         .from('payments')
         .getPublicUrl(fileName);
-        
+
       payment_proof_url = publicUrlData.publicUrl;
     }
 

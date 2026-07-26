@@ -32,12 +32,56 @@ export async function createCampaignAction(input: CreateCampaignInput) {
 
     if (!user) return { error: 'Not authenticated.' };
 
+    let finalPaymentProofUrl = input.paymentProofUrl || null;
+    let finalImageUrl = input.imageUrl || null;
+
+    // Helper to convert & upload base64 images to Supabase Storage
+    const uploadBase64ToStorage = async (dataUrl: string, prefix: string) => {
+      try {
+        const matches = dataUrl.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
+        if (!matches) return dataUrl;
+
+        const contentType = matches[1];
+        const base64Data = matches[2];
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        const ext = contentType.split('/')[1] || 'jpg';
+        const fileName = `${prefix}-${user.id}-${Date.now()}.${ext}`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from('payments')
+          .upload(fileName, buffer, { contentType, upsert: true });
+
+        if (uploadErr) {
+          console.error('Storage upload error:', uploadErr);
+          return dataUrl;
+        }
+
+        const { data: pubData } = supabase.storage
+          .from('payments')
+          .getPublicUrl(fileName);
+
+        return pubData.publicUrl;
+      } catch (err) {
+        console.error('Failed to process base64 upload:', err);
+        return dataUrl;
+      }
+    };
+
+    if (input.paymentProofUrl && input.paymentProofUrl.startsWith('data:image/')) {
+      finalPaymentProofUrl = await uploadBase64ToStorage(input.paymentProofUrl, 'ad-proof');
+    }
+
+    if (input.imageUrl && input.imageUrl.startsWith('data:image/')) {
+      finalImageUrl = await uploadBase64ToStorage(input.imageUrl, 'ad-poster');
+    }
+
     const { data, error } = await supabase.from('advertisements').insert({
       user_id: user.id,
       business_id: input.businessId || null,
       title: input.title,
       description: input.description,
-      image_url: input.imageUrl || null,
+      image_url: finalImageUrl,
       cta_text: input.ctaText || 'Visit Business',
       target_city: input.targetCity || 'All India',
       category: input.category || 'General',
@@ -46,7 +90,7 @@ export async function createCampaignAction(input: CreateCampaignInput) {
       amount: input.amount,
       duration_days: input.durationDays,
       utr_number: input.utrNumber,
-      payment_proof_url: input.paymentProofUrl || null,
+      payment_proof_url: finalPaymentProofUrl,
       account_holder_name: input.accountHolderName || null,
       status: 'payment_verification',
       payment_status: 'pending',
