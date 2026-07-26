@@ -45,7 +45,7 @@ export function Navbar() {
           { href: '/admin/advertisements', label: 'Advertisements' },
         ]
       : [
-          { href: '/dashboard', label: 'Dashboard' },
+          { href: '/', label: 'Dashboard' },
           { href: '/dashboard/business', label: 'My Business' },
           { href: '/dashboard/search', label: 'Search Businesses' },
           { href: '/dashboard/advertisements', label: 'My Advertisements' },

@@ -3,8 +3,9 @@ import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { BusinessCard } from '@/components/business-card';
 import { Button } from '@/components/ui/button';
-import { getLatestBusinesses, getHomeStats, getCategories } from '@/actions/business';
+import { getLatestBusinesses, getHomeStats, getCategories, getMyBusiness } from '@/actions/business';
 import { getHomepageRunningAdsAction } from '@/actions/advertisement';
+import { getProfile } from '@/actions/auth';
 import { RenderAdTemplate } from '@/components/ad-templates';
 import { HeroCarousel } from '@/components/hero-carousel';
 import { HOW_IT_WORKS } from '@/lib/constants';
@@ -48,16 +49,34 @@ const POPULAR_CATEGORIES = [
 ];
 
 export default async function HomePage() {
-  const [latestBusinesses, stats, categories, runningAds] = await Promise.all([
+  const [latestBusinesses, stats, categories, runningAds, profile, business] = await Promise.all([
     getLatestBusinesses(6),
     getHomeStats(),
     getCategories(),
     getHomepageRunningAdsAction(),
+    getProfile(),
+    getMyBusiness(),
   ]);
 
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
+
+      {/* Non-intrusive banner if user is logged in but hasn't registered a business yet */}
+      {profile && !business && (
+        <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 text-slate-950 py-2.5 px-4 shadow-sm border-b border-amber-600/30">
+          <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left text-xs sm:text-sm font-bold">
+            <div>
+              <span>✨ You haven&apos;t registered a business yet. Register your business to unlock additional features and get listed on the directory.</span>
+            </div>
+            <Link href="/dashboard/business/register" className="shrink-0">
+              <Button size="sm" className="bg-slate-950 text-white hover:bg-slate-800 text-xs font-black px-4 py-1.5 h-auto rounded-lg shadow-sm">
+                Register Your Business →
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1">
         {/* Modern Full-Width Hero Image Carousel Showcase */}
