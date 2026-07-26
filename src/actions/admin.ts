@@ -3,15 +3,50 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+// Strictly verify administrator access (Restricted ONLY to arhambizconnect@gmail.com)
+async function verifyAdminAccess() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Unauthorized: Authentication required.');
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, email')
+    .eq('id', user.id)
+    .single();
+
+  if (
+    profile?.role !== 'admin' ||
+    user.email?.toLowerCase() !== 'arhambizconnect@gmail.com'
+  ) {
+    throw new Error(
+      'Unauthorized: Administrator privileges are restricted exclusively to arhambizconnect@gmail.com.'
+    );
+  }
+
+  return { supabase, user, profile };
+}
+
 // Get admin dashboard stats
 export async function getAdminStats() {
-  const supabase = await createClient();
+  const { supabase } = await verifyAdminAccess();
 
   const [users, businesses, pendingBiz, pendingAds] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('businesses').select('id', { count: 'exact', head: true }),
-    supabase.from('businesses').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('advertisements').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase
+      .from('businesses')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending'),
+    supabase
+      .from('advertisements')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending'),
   ]);
 
   return {
@@ -24,7 +59,7 @@ export async function getAdminStats() {
 
 // Get all businesses (admin)
 export async function getAllBusinesses(search?: string) {
-  const supabase = await createClient();
+  const { supabase } = await verifyAdminAccess();
 
   let query = supabase
     .from('businesses')
@@ -42,8 +77,11 @@ export async function getAllBusinesses(search?: string) {
 }
 
 // Update business status (admin)
-export async function updateBusinessStatus(id: string, status: 'approved' | 'rejected') {
-  const supabase = await createClient();
+export async function updateBusinessStatus(
+  id: string,
+  status: 'approved' | 'rejected'
+) {
+  const { supabase } = await verifyAdminAccess();
 
   const { error } = await supabase
     .from('businesses')
@@ -60,12 +98,9 @@ export async function updateBusinessStatus(id: string, status: 'approved' | 'rej
 
 // Delete a business (admin)
 export async function adminDeleteBusiness(id: string) {
-  const supabase = await createClient();
+  const { supabase } = await verifyAdminAccess();
 
-  const { error } = await supabase
-    .from('businesses')
-    .delete()
-    .eq('id', id);
+  const { error } = await supabase.from('businesses').delete().eq('id', id);
 
   if (error) return { error: error.message };
 
@@ -76,7 +111,7 @@ export async function adminDeleteBusiness(id: string) {
 
 // Get all advertisements (admin)
 export async function getAllAdvertisements(search?: string) {
-  const supabase = await createClient();
+  const { supabase } = await verifyAdminAccess();
 
   let query = supabase
     .from('advertisements')
@@ -94,8 +129,11 @@ export async function getAllAdvertisements(search?: string) {
 }
 
 // Update advertisement status (admin)
-export async function updateAdStatus(id: string, status: 'approved' | 'rejected') {
-  const supabase = await createClient();
+export async function updateAdStatus(
+  id: string,
+  status: 'approved' | 'rejected'
+) {
+  const { supabase } = await verifyAdminAccess();
 
   const { error } = await supabase
     .from('advertisements')
@@ -110,7 +148,7 @@ export async function updateAdStatus(id: string, status: 'approved' | 'rejected'
 
 // Delete an advertisement (admin)
 export async function adminDeleteAdvertisement(id: string) {
-  const supabase = await createClient();
+  const { supabase } = await verifyAdminAccess();
 
   const { error } = await supabase
     .from('advertisements')
@@ -125,7 +163,7 @@ export async function adminDeleteAdvertisement(id: string) {
 
 // Get all users (admin)
 export async function getAllUsers(search?: string) {
-  const supabase = await createClient();
+  const { supabase } = await verifyAdminAccess();
 
   let query = supabase
     .from('profiles')
@@ -142,7 +180,7 @@ export async function getAllUsers(search?: string) {
 
 // Get pending users (admin)
 export async function getPendingUsers() {
-  const supabase = await createClient();
+  const { supabase } = await verifyAdminAccess();
 
   const { data } = await supabase
     .from('profiles')
@@ -155,8 +193,11 @@ export async function getPendingUsers() {
 }
 
 // Update user registration status (admin)
-export async function updateUserRegistrationStatus(id: string, status: 'approved' | 'rejected') {
-  const supabase = await createClient();
+export async function updateUserRegistrationStatus(
+  id: string,
+  status: 'approved' | 'rejected'
+) {
+  const { supabase } = await verifyAdminAccess();
 
   const { error } = await supabase
     .from('profiles')
@@ -171,16 +212,11 @@ export async function updateUserRegistrationStatus(id: string, status: 'approved
   return { success: true };
 }
 
-// Delete a user (admin) — deletes from auth.users which cascades to profiles
+// Delete a user (admin)
 export async function adminDeleteUser(id: string) {
-  const supabase = await createClient();
+  const { supabase } = await verifyAdminAccess();
 
-  // We can't delete from auth.users via the client SDK with anon key.
-  // Instead, delete from profiles table (which will cascade to businesses & ads)
-  const { error } = await supabase
-    .from('profiles')
-    .delete()
-    .eq('id', id);
+  const { error } = await supabase.from('profiles').delete().eq('id', id);
 
   if (error) return { error: error.message };
 

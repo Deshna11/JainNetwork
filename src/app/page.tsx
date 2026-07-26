@@ -280,7 +280,7 @@ export default async function HomePage() {
                       Darshan Bharatji Oswal
                     </h3>
                     <p className="mt-1 text-xs sm:text-sm font-bold text-slate-300">
-                      B.Tech CSE | AI Engineer
+                      B.Tech CSE | AI Engineer | Jeweller
                     </p>
                   </div>
 

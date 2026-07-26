@@ -57,14 +57,17 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Check admin role
+    // Check admin role and email
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, email')
       .eq('id', user.id)
       .single();
 
-    if (profile?.role !== 'admin') {
+    if (
+      profile?.role !== 'admin' ||
+      user.email?.toLowerCase() !== 'arhambizconnect@gmail.com'
+    ) {
       const url = request.nextUrl.clone();
       url.pathname = '/dashboard';
       return NextResponse.redirect(url);
