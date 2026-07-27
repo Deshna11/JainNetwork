@@ -141,12 +141,13 @@ export async function createBusiness(formData: FormData) {
       state: formData.get('state') as string,
       gst_number: (formData.get('gst_number') as string) || null,
       payment_proof_url,
-      status: 'approved',
+      status: 'pending',
     });
 
     if (error) return { error: error.message };
 
     revalidatePath('/dashboard');
+    revalidatePath('/admin/businesses');
     return { success: true };
   } catch (err: any) {
     return { error: err.message || 'Failed to create business.' };
@@ -187,7 +188,7 @@ export async function updateBusiness(formData: BusinessFormData) {
   }
 }
 
-// Get a business by slug (public — must be approved)
+// Get a business by slug (public — must be approved, unless caller is owner or admin)
 export async function getBusinessBySlug(slug: string) {
   try {
     const supabase = await createClient();
@@ -196,6 +197,20 @@ export async function getBusinessBySlug(slug: string) {
       .select('*, categories(id, name, slug)')
       .eq('slug', slug)
       .single();
+
+    if (!data) return null;
+
+    if (data.status !== 'approved') {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const isOwner = user.id === data.owner_id;
+      const isAdmin = user.email?.toLowerCase() === 'arhambizconnect@gmail.com';
+
+      if (!isOwner && !isAdmin) {
+        return null;
+      }
+    }
 
     return data as BusinessWithCategory | null;
   } catch (err) {

@@ -13,6 +13,9 @@ import { INDIAN_STATES } from '@/lib/constants';
 import { BANK_DETAILS } from '@/lib/ad-plans';
 import type { Category } from '@/types/database';
 
+import { LocationAutocomplete } from '@/components/location-autocomplete';
+import type { LocationSuggestion } from '@/lib/location-search-service';
+
 interface BusinessFormProps {
   categories: Category[];
 }
@@ -20,6 +23,7 @@ interface BusinessFormProps {
 export function BusinessRegisterForm({ categories }: BusinessFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<LocationSuggestion | null>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -39,6 +43,12 @@ export function BusinessRegisterForm({ categories }: BusinessFormProps) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (!selectedLocation) {
+      toast.error('Please select a valid location from the search dropdown.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -104,23 +114,17 @@ export function BusinessRegisterForm({ categories }: BusinessFormProps) {
               <Label htmlFor="website">Website</Label>
               <Input id="website" name="website" type="url" placeholder="https://" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="city">City *</Label>
-              <Input id="city" name="city" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="state">State *</Label>
-              <select
-                id="state"
-                name="state"
+            {/* Location Autocomplete (Full India Search) */}
+            <div className="space-y-2 sm:col-span-2">
+              <LocationAutocomplete
+                value={selectedLocation}
+                onChange={(loc) => setSelectedLocation(loc)}
+                placeholder="Search city, town, village, district or state in India..."
+                label="City / Location *"
                 required
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <option value="">Select state</option>
-                {INDIAN_STATES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
+              />
+              <input type="hidden" name="city" value={selectedLocation?.name || ''} />
+              <input type="hidden" name="state" value={selectedLocation?.state || ''} />
             </div>
           </div>
 

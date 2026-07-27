@@ -28,6 +28,10 @@ import {
   Briefcase,
   Coins,
   ShieldCheck,
+  Camera,
+  Palette,
+  Plane,
+  Bath,
 } from 'lucide-react';
 
 const POPULAR_CATEGORIES = [
@@ -46,6 +50,10 @@ const POPULAR_CATEGORIES = [
   { name: 'Retailers', icon: ShoppingBag },
   { name: 'Consultants', icon: Briefcase },
   { name: 'Investors', icon: Coins },
+  { name: 'Photographers', icon: Camera },
+  { name: 'Graphics Designers', icon: Palette },
+  { name: 'Travel Agents', icon: Plane },
+  { name: 'Tiles and Sanitarywares', icon: Bath },
 ];
 
 export default async function HomePage() {
