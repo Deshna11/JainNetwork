@@ -6,6 +6,9 @@ export const metadata = {
   title: 'Advertisement Management — Admin Panel',
 };
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function AdminAdvertisementsPage() {
   const campaigns = await getAdminCampaignsAction();
 

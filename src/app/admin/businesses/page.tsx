@@ -5,6 +5,9 @@ export const metadata = {
   title: 'Manage Businesses — Admin',
 };
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function AdminBusinessesPage() {
   const businesses = await getAllBusinesses();
 

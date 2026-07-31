@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"name": "JainNetwork Root",
+			"path": ".."
+		},
+		{
+			"name": "GeoNames Data",
+			"path": "geonames_in"
+		}
+	],
+	"settings": {
+		"files.watcherExclude": {
+			"**/geonames_in/IN.txt": true
+		},
+		"search.exclude": {
+			"**/geonames_in/IN.txt": true
+		}
+	}
+}

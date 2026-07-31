@@ -25,6 +25,7 @@ async function runEndToEndApprovalTests() {
     const { data: newBiz, error: insertError } = await supabase
       .from('businesses')
       .insert({
+        owner_id: 'a66da22b-ac76-408a-8b8c-a2de37b424cd',
         business_name: 'Test Workflow Enterprises',
         owner_name: 'Workflow Tester',
         email: 'tester@example.com',
