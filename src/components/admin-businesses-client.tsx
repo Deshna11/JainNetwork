@@ -20,6 +20,7 @@ interface Props {
 export function AdminBusinessesClient({ initialBusinesses, searchAction }: Props) {
   const [businesses, setBusinesses] = useState(initialBusinesses);
   const [search, setSearch] = useState('');
+  const [filterTab, setFilterTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   async function handleSearch(e: React.FormEvent) {
@@ -55,17 +56,60 @@ export function AdminBusinessesClient({ initialBusinesses, searchAction }: Props
     setLoadingId(null);
   }
 
+  // Filter businesses by active tab, putting pending items at the top
+  const filteredBusinesses = businesses
+    .filter((b) => (filterTab === 'all' ? true : b.status === filterTab))
+    .sort((a, b) => {
+      if (a.status === 'pending' && b.status !== 'pending') return -1;
+      if (a.status !== 'pending' && b.status === 'pending') return 1;
+      return 0;
+    });
+
+  const pendingCount = businesses.filter((b) => b.status === 'pending').length;
+
   return (
     <div>
-      <form onSubmit={handleSearch} className="mb-6 flex gap-2">
-        <Input
-          placeholder="Search businesses..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-sm"
-        />
-        <Button type="submit" variant="outline">Search</Button>
-      </form>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <Input
+            placeholder="Search businesses..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="max-w-sm"
+          />
+          <Button type="submit" variant="outline">Search</Button>
+        </form>
+
+        <div className="flex gap-1.5 rounded-lg border bg-gray-50/50 p-1">
+          <button
+            type="button"
+            onClick={() => setFilterTab('all')}
+            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+              filterTab === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            All ({businesses.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterTab('pending')}
+            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors flex items-center gap-1 ${
+              filterTab === 'pending' ? 'bg-amber-500 text-white shadow-sm' : 'text-amber-700 hover:bg-amber-50'
+            }`}
+          >
+            ⏳ Pending ({pendingCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterTab('approved')}
+            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+              filterTab === 'approved' ? 'bg-emerald-600 text-white shadow-sm' : 'text-emerald-700 hover:bg-emerald-50'
+            }`}
+          >
+            Approved ({businesses.filter(b => b.status === 'approved').length})
+          </button>
+        </div>
+      </div>
 
       <div className="rounded-lg border overflow-x-auto">
         <Table>
@@ -80,14 +124,14 @@ export function AdminBusinessesClient({ initialBusinesses, searchAction }: Props
             </TableRow>
           </TableHeader>
           <TableBody>
-            {businesses.length === 0 ? (
+            {filteredBusinesses.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                   No businesses found.
                 </TableCell>
               </TableRow>
             ) : (
-              businesses.map((biz) => (
+              filteredBusinesses.map((biz) => (
                 <TableRow key={biz.id}>
                   <TableCell>
                     <div>

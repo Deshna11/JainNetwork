@@ -1,18 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { User } from 'lucide-react';
-import { useState, useEffect, startTransition } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { logout } from '@/actions/auth';
 import type { Profile } from '@/types/database';
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -20,21 +21,62 @@ export function Navbar() {
   useEffect(() => {
     const supabase = createClient();
 
-    async function getProfile() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        setProfile(data);
+    async function fetchProfile(user: any) {
+      if (!user) {
+        setProfile(null);
+        setLoading(false);
+        return;
       }
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      setProfile(data);
       setLoading(false);
     }
 
-    getProfile();
-  }, []);
+    // Initial check
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      fetchProfile(user);
+    });
+
+    // Subscribe to real-time auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        setProfile(null);
+        setLoading(false);
+      } else if (session?.user) {
+        fetchProfile(session.user);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [pathname]);
+
+  async function handleLogout() {
+    // 1. Immediately update local UI state to logged out
+    setProfile(null);
+    setLoading(false);
+    setMobileOpen(false);
+
+    try {
+      // 2. Sign out browser client auth session
+      const supabase = createClient();
+      await supabase.auth.signOut();
+
+      // 3. Trigger server action to clear cookies & revalidate
+      await logout();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      // 4. Navigate and refresh router
+      router.push('/');
+      router.refresh();
+    }
+  }
 
   const navLinks = profile
     ? profile.role === 'admin'
@@ -103,12 +145,8 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="cursor-pointer text-red-600"
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    startTransition(() => {
-                      logout();
-                    });
-                  }}
+                  onClick={() => handleLogout()}
+                  onSelect={() => handleLogout()}
                 >
                   Logout
                 </DropdownMenuItem>
@@ -165,10 +203,7 @@ export function Navbar() {
                   </Link>
                   <button
                     onClick={() => {
-                      setMobileOpen(false);
-                      startTransition(() => {
-                        logout();
-                      });
+                      handleLogout();
                     }}
                     className="w-full text-left rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
                   >

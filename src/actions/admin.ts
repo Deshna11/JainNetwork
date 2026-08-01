@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
 // Strictly verify administrator access (Restricted ONLY to arhambizconnect@gmail.com)
@@ -20,16 +21,14 @@ async function verifyAdminAccess() {
     .eq('id', user.id)
     .single();
 
-  if (
-    profile?.role !== 'admin' ||
-    user.email?.toLowerCase() !== 'arhambizconnect@gmail.com'
-  ) {
+  if (profile?.role !== 'admin') {
     throw new Error(
-      'Unauthorized: Administrator privileges are restricted exclusively to arhambizconnect@gmail.com.'
+      'Unauthorized: Administrator privileges required.'
     );
   }
 
-  return { supabase, user, profile };
+  const adminDb = createAdminClient();
+  return { supabase, adminDb, user, profile };
 }
 
 // Get admin dashboard stats

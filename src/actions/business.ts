@@ -205,7 +205,12 @@ export async function getBusinessBySlug(slug: string) {
       if (!user) return null;
 
       const isOwner = user.id === data.owner_id;
-      const isAdmin = user.email?.toLowerCase() === 'arhambizconnect@gmail.com';
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      const isAdmin = profile?.role === 'admin';
 
       if (!isOwner && !isAdmin) {
         return null;

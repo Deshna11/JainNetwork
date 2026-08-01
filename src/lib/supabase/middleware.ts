@@ -64,10 +64,7 @@ export async function updateSession(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    if (
-      profile?.role !== 'admin' ||
-      user.email?.toLowerCase() !== 'arhambizconnect@gmail.com'
-    ) {
+    if (profile?.role !== 'admin') {
       const url = request.nextUrl.clone();
       url.pathname = '/';
       return NextResponse.redirect(url);
